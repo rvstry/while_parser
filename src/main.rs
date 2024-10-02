@@ -36,13 +36,13 @@ struct Lexer {
 
 impl Lexer {
     fn peek(&self) -> Option<u8> {
-        self.input.get(0).copied()
+        self.input.front().copied()
 
     }
     fn eat(&mut self, c: u8) {
         if c == self.peek().unwrap() {
             // consume
-            &mut self.input.pop_front();
+            self.input.pop_front();
         }
 
     }
@@ -59,7 +59,7 @@ impl Lexer {
         let mut lexeme: VecDeque<u8> = VecDeque::new();
         while self.peek().unwrap().is_ascii_digit() {
             let c = self.peek().unwrap();
-            &mut self.eat(c);
+            self.eat(c);
             lexeme.push_back(c);
         }
         Token::Num(String::from_utf8(lexeme.into()).unwrap())
@@ -69,7 +69,7 @@ impl Lexer {
         let mut lexeme: VecDeque<u8> = VecDeque::new();
         while self.peek().unwrap().is_ascii_alphanumeric() || (self.peek().unwrap() == 0x27) {
             let c = self.peek().unwrap();
-            &mut self.eat(c);
+            self.eat(c);
             lexeme.push_back(c);
         }
         match String::from_utf8(lexeme.to_owned().into()).unwrap().as_str() {
@@ -98,27 +98,27 @@ impl Lexer {
             };
 
             match c as char {
-                '=' => {lexer.eat('=' as u8); tokens.push_back(Token::Equals)},
-                '!' => {lexer.eat('!' as u8); tokens.push_back(Token::Not)},
-                '+' => {lexer.eat('+' as u8); tokens.push_back(Token::Plus)},
-                '-' => {lexer.eat('-' as u8); tokens.push_back(Token::Minus)},
-                '&' => {lexer.eat('&' as u8); lexer.eat('&' as u8); tokens.push_back(Token::And)}
-                '|' => {lexer.eat('|' as u8); lexer.eat('|' as u8); tokens.push_back(Token::Or)}
+                '=' => {lexer.eat(b'='); tokens.push_back(Token::Equals)},
+                '!' => {lexer.eat(b'!'); tokens.push_back(Token::Not)},
+                '+' => {lexer.eat(b'+'); tokens.push_back(Token::Plus)},
+                '-' => {lexer.eat(b'-'); tokens.push_back(Token::Minus)},
+                '&' => {lexer.eat(b'&'); lexer.eat(b'&'); tokens.push_back(Token::And)}
+                '|' => {lexer.eat(b'|'); lexer.eat(b'|'); tokens.push_back(Token::Or)}
                 '<' => {
-                    lexer.eat('<' as u8);
+                    lexer.eat(b'<');
                     if lexer.peek().unwrap() as char == '-' {
-                        lexer.eat('-' as u8);
+                        lexer.eat(b'-');
                         tokens.push_back(Token::Assignment)
                     }
                     else {tokens.push_back(Token::LessThan)}
                 }
-                '*' => {lexer.eat('*' as u8); tokens.push_back(Token::Asterisk)},
-                '(' => {lexer.eat('(' as u8); tokens.push_back(Token::LeftParenthesis)},
-                ')' => {lexer.eat(')' as u8); tokens.push_back(Token::RightParenthesis)},
+                '*' => {lexer.eat(b'*'); tokens.push_back(Token::Asterisk)},
+                '(' => {lexer.eat(b'('); tokens.push_back(Token::LeftParenthesis)},
+                ')' => {lexer.eat(b')'); tokens.push_back(Token::RightParenthesis)},
 
-                '{' => {lexer.eat('{' as u8); tokens.push_back(Token::LeftCurly)},
-                '}' => {lexer.eat('}' as u8); tokens.push_back(Token::RightCurly)},
-                ';' => {lexer.eat(';' as u8); tokens.push_back(Token::Semicolon)},
+                '{' => {lexer.eat(b'{'); tokens.push_back(Token::LeftCurly)},
+                '}' => {lexer.eat(b'}'); tokens.push_back(Token::RightCurly)},
+                ';' => {lexer.eat(b';'); tokens.push_back(Token::Semicolon)},
                 _ => {
                     if c.is_ascii_digit() {
                         tokens.push_back(lexer.lex_number());
@@ -127,7 +127,7 @@ impl Lexer {
                         tokens.push_back(lexer.lex_kw_or_id());
                     }
                     if c.is_ascii_whitespace() {
-                        lexer.eat(c as u8);
+                        lexer.eat(c);
                     }
                 }
 
