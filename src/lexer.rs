@@ -75,7 +75,7 @@ pub fn lex(s: VecDeque<u8>) -> VecDeque<Token> {
             '<' => {
                 i = eat(&i, b'<');
                 if peek(&i).unwrap() as char == '-' {
-                    eat(&i, b'-');
+                    i = eat(&i, b'-');
                     tokens.push_back(Token::Assignment)
                 }
                 else {tokens.push_back(Token::LessThan)}
