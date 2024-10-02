@@ -1,114 +1,113 @@
 use std::collections::VecDeque;
 use crate::token::Token;
 
-pub struct Lexer {
-    input: VecDeque<u8>,
+fn peek(input: &VecDeque<u8>) -> Option<u8> {
+    input.front().copied()
+
+}
+fn eat(input: &VecDeque<u8>, c: u8) ->VecDeque<u8>{
+    if c == peek(&input).unwrap() {
+        // consume
+        let mut p = input.clone();
+        p.split_off(1)
+    }
+    else {panic!()}
+
+}
+fn is_more(input: &VecDeque<u8>) -> bool {
+    !(input.is_empty())
 }
 
-impl Lexer {
-    fn peek(&self) -> Option<u8> {
-        self.input.front().copied()
-
-    }
-    fn eat(&mut self, c: u8) {
-        if c == self.peek().unwrap() {
-            // consume
-            self.input.pop_front();
-        }
-
-    }
-    fn is_more(&self) -> bool {
-        !(self.input.is_empty())
-    }
-    fn init(s: VecDeque<u8>) ->Self {
-        Self {
-            input: s
-        }
+fn lex_number(input: &VecDeque<u8>) -> (Token, VecDeque<u8>) {
+    let mut lexeme: VecDeque<u8> = VecDeque::new();
+    let mut i = input.to_owned();
+    while peek(&i).unwrap().is_ascii_digit() {
+        let c = peek(&i).unwrap();
+        i = eat(&i, c);
+        lexeme.push_back(c);
     }
 
-    fn lex_number(&mut self) ->Token {
-        let mut lexeme: VecDeque<u8> = VecDeque::new();
-        while self.peek().unwrap().is_ascii_digit() {
-            let c = self.peek().unwrap();
-            self.eat(c);
-            lexeme.push_back(c);
-        }
-        Token::Num(String::from_utf8(lexeme.into()).unwrap())
+    (Token::Num(String::from_utf8(lexeme.into()).unwrap()), i)
 
+}
+fn lex_kw_or_id(input: &VecDeque<u8>) -> (Token, VecDeque<u8>) {
+    let mut lexeme: VecDeque<u8> = VecDeque::new();
+    let mut i = input.to_owned();
+    while peek(&i).unwrap().is_ascii_alphanumeric() || peek(&i).unwrap() == 0x27 {
+        let c = peek(&i).unwrap();
+        i = eat(&i, c);
+        lexeme.push_back(c);
     }
-    fn lex_kw_or_id(&mut self) ->Token {
-        let mut lexeme: VecDeque<u8> = VecDeque::new();
-        while self.peek().unwrap().is_ascii_alphanumeric() || (self.peek().unwrap() == 0x27) {
-            let c = self.peek().unwrap();
-            self.eat(c);
-            lexeme.push_back(c);
-        }
-        match String::from_utf8(lexeme.to_owned().into()).unwrap().as_str() {
-            "if" => Token::If,
-            "then" => Token::Then,
-            "else" => Token::Else,
-            "while" => Token::While,
-            "do" => Token::Do,
-            "skip" => Token::Skip,
-            "true" => Token::True,
-            "false" => Token::False,
-            _ => Token::Id(String::from_utf8(lexeme.to_owned().into()).unwrap())
+    let t = match String::from_utf8(lexeme.to_owned().into()).unwrap().as_str() {
+        "if" => Token::If,
+        "then" => Token::Then,
+        "else" => Token::Else,
+        "while" => Token::While,
+        "do" => Token::Do,
+        "skip" => Token::Skip,
+        "true" => Token::True,
+        "false" => Token::False,
+        _ => Token::Id(String::from_utf8(lexeme.to_owned().into()).unwrap())
 
-        }
-    }
+    };
+    (t, i)
 
-    pub fn lex(s: VecDeque<u8>) -> VecDeque<Token> {
-        let mut lexer = Self::init(s);
-        let mut tokens: VecDeque<Token> = VecDeque::new();
+}
 
-        while lexer.is_more() {
-            let x = lexer.peek();
-            let c = match x {
-                Some(a) => a,
-                None => break
-            };
+pub fn lex(s: VecDeque<u8>) -> VecDeque<Token> {
+    let mut tokens: VecDeque<Token> = VecDeque::new();
 
-            match c as char {
-                '=' => {lexer.eat(b'='); tokens.push_back(Token::Equals)},
-                '!' => {lexer.eat(b'!'); tokens.push_back(Token::Not)},
-                '+' => {lexer.eat(b'+'); tokens.push_back(Token::Plus)},
-                '-' => {lexer.eat(b'-'); tokens.push_back(Token::Minus)},
-                '&' => {lexer.eat(b'&'); lexer.eat(b'&'); tokens.push_back(Token::And)}
-                '|' => {lexer.eat(b'|'); lexer.eat(b'|'); tokens.push_back(Token::Or)}
-                '<' => {
-                    lexer.eat(b'<');
-                    if lexer.peek().unwrap() as char == '-' {
-                        lexer.eat(b'-');
-                        tokens.push_back(Token::Assignment)
-                    }
-                    else {tokens.push_back(Token::LessThan)}
+    let mut i = s.to_owned();
+    while is_more(&i) {
+        let x = peek(&i);
+        let c = match x {
+            Some(a) => a,
+            None => break
+        };
+
+        match c as char {
+            '=' => {i = eat(&i, b'='); tokens.push_back(Token::Equals)},
+            '!' => {i = eat(&i, b'!'); tokens.push_back(Token::Not)},
+            '+' => {i = eat(&i, b'+'); tokens.push_back(Token::Plus)},
+            '-' => {i = eat(&i, b'-'); tokens.push_back(Token::Minus)},
+            '&' => {i = eat(&i, b'&'); i = eat(&i, b'&'); tokens.push_back(Token::And)}
+            '|' => {i = eat(&i, b'|'); i = eat(&i, b'|'); tokens.push_back(Token::Or)}
+            '<' => {
+                i = eat(&i, b'<');
+                if peek(&i).unwrap() as char == '-' {
+                    eat(&i, b'-');
+                    tokens.push_back(Token::Assignment)
                 }
-                '*' => {lexer.eat(b'*'); tokens.push_back(Token::Asterisk)},
-                '(' => {lexer.eat(b'('); tokens.push_back(Token::LeftParenthesis)},
-                ')' => {lexer.eat(b')'); tokens.push_back(Token::RightParenthesis)},
-
-                '{' => {lexer.eat(b'{'); tokens.push_back(Token::LeftCurly)},
-                '}' => {lexer.eat(b'}'); tokens.push_back(Token::RightCurly)},
-                ';' => {lexer.eat(b';'); tokens.push_back(Token::Semicolon)},
-                _ => {
-                    if c.is_ascii_digit() {
-                        tokens.push_back(lexer.lex_number());
-                    }
-                    if c.is_ascii_lowercase() {
-                        tokens.push_back(lexer.lex_kw_or_id());
-                    }
-                    if c.is_ascii_whitespace() {
-                        lexer.eat(c);
-                    }
+                else {tokens.push_back(Token::LessThan)}
+            }
+            '*' => {i = eat(&i, b'*'); tokens.push_back(Token::Asterisk)},
+            '(' => {i = eat(&i, b'('); tokens.push_back(Token::LeftParenthesis)},
+            ')' => {i = eat(&i, b')'); tokens.push_back(Token::RightParenthesis)},
+            '{' => {i = eat(&i, b'{'); tokens.push_back(Token::LeftCurly)},
+            '}' => {i = eat(&i, b'}'); tokens.push_back(Token::RightCurly)},
+            ';' => {i = eat(&i, b';'); tokens.push_back(Token::Semicolon)},
+            _ => {
+                if c.is_ascii_digit() {
+                    let (t, out) = lex_number(&i);
+                    i = out;
+                    tokens.push_back(t);
                 }
-
-
+                if c.is_ascii_lowercase() {
+                    let (t, out) = lex_kw_or_id(&i);
+                    i = out;
+                    tokens.push_back(t);
+                }
+                if c.is_ascii_whitespace() {
+                    i = eat(&i, c);
+                }
             }
 
 
         }
-        tokens.push_back(Token::Dollar);
 
-        tokens
+
     }
+    tokens.push_back(Token::Dollar);
+
+    tokens
 }
