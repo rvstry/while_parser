@@ -20,11 +20,11 @@ fn parse_prog(input: &VecDeque<Token>) ->VecDeque<Token> {
     let c = peek(input).unwrap();
     let mut out: VecDeque<Token>;
     match c {
-        Token::If => { out = parse_stmt(input); out = parse_stmts(&out); eat(&out, Token::Dollar)},
-        Token::While => { out = parse_stmt(input); out = parse_stmts(&out); eat(&out, Token::Dollar)},
-        Token::Skip => { out = parse_stmt(input); out = parse_stmts(&out); eat(&out, Token::Dollar)},
-        Token::Id(_) => { out = parse_stmt(input); out = parse_stmts(&out); eat(&out, Token::Dollar)},
-        Token::LeftCurly => { out = parse_stmt(input); out = parse_stmts(&out); eat(&out, Token::Dollar)},
+        Token::If => { out = parse_stmt(input); out = parse_stmts(&out); out = eat(&out, Token::Dollar)},
+        Token::While => { out = parse_stmt(input); out = parse_stmts(&out); out = eat(&out, Token::Dollar)},
+        Token::Skip => { out = parse_stmt(input); out = parse_stmts(&out); out = eat(&out, Token::Dollar)},
+        Token::Id(_) => { out = parse_stmt(input); out = parse_stmts(&out); out = eat(&out, Token::Dollar)},
+        Token::LeftCurly => { out = parse_stmt(input); out = parse_stmts(&out); out = eat(&out, Token::Dollar)},
         _ => panic!(),
     };
 
