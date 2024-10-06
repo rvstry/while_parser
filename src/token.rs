@@ -1,4 +1,6 @@
 #[derive(Debug)]
+#[derive(Clone)]
+#[derive(PartialEq, Eq)]
 pub enum Token {
     If,
     Then,
