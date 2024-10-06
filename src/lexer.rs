@@ -21,10 +21,13 @@ fn is_more(input: &VecDeque<u8>) -> bool {
 fn lex_number(input: &VecDeque<u8>) -> (Token, VecDeque<u8>) {
     let mut lexeme: VecDeque<u8> = VecDeque::new();
     let mut i = input.to_owned();
-    while peek(&i).unwrap().is_ascii_digit() {
+    while is_more(&i) {
         let c = peek(&i).unwrap();
-        i = eat(&i, c);
-        lexeme.push_back(c);
+        if c.is_ascii_digit() {
+            i = eat(&i, c);
+            lexeme.push_back(c);
+        }
+        else {break};
     }
 
     (Token::Num(String::from_utf8(lexeme.into()).unwrap()), i)
@@ -33,11 +36,15 @@ fn lex_number(input: &VecDeque<u8>) -> (Token, VecDeque<u8>) {
 fn lex_kw_or_id(input: &VecDeque<u8>) -> (Token, VecDeque<u8>) {
     let mut lexeme: VecDeque<u8> = VecDeque::new();
     let mut i = input.to_owned();
-    while peek(&i).unwrap().is_ascii_alphanumeric() || peek(&i).unwrap() == 0x27 {
+    while is_more(&i) {
         let c = peek(&i).unwrap();
-        i = eat(&i, c);
-        lexeme.push_back(c);
+        if c.is_ascii_alphanumeric() || c == 0x27 {
+            i = eat(&i, c);
+            lexeme.push_back(c);
+        }
+        else {break};
     }
+
     let t = match String::from_utf8(lexeme.to_owned().into()).unwrap().as_str() {
         "if" => Token::If,
         "then" => Token::Then,
