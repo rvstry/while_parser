@@ -6,7 +6,7 @@ fn peek(input: &VecDeque<u8>) -> Option<u8> {
 
 }
 fn eat(input: &VecDeque<u8>, c: u8) ->VecDeque<u8>{
-    if c == peek(&input).unwrap() {
+    if c == peek(input).unwrap() {
         // consume
         let mut p = input.clone();
         p.split_off(1)

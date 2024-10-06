@@ -7,7 +7,7 @@ fn peek(input: &VecDeque<Token>) -> Option<Token> {
 }
 
 fn eat(input: &VecDeque<Token>, tk: Token) ->VecDeque<Token>{
-    if tk == peek(&input).unwrap() {
+    if tk == peek(input).unwrap() {
         // consume
         let mut p = input.clone();
         p.split_off(1)
@@ -17,8 +17,8 @@ fn eat(input: &VecDeque<Token>, tk: Token) ->VecDeque<Token>{
 }
 
 fn parse_prog(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::If => { out = parse_stmt(input); out = parse_stmts(&out); eat(&out, Token::Dollar)},
         Token::While => { out = parse_stmt(input); out = parse_stmts(&out); eat(&out, Token::Dollar)},
@@ -27,12 +27,13 @@ fn parse_prog(input: &VecDeque<Token>) ->VecDeque<Token> {
         Token::LeftCurly => { out = parse_stmt(input); out = parse_stmts(&out); eat(&out, Token::Dollar)},
         _ => panic!(),
     };
-    out // temporary!!
+
+    out
 }
 
 fn parse_stmt(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::If => {out = eat(input, Token::If); out = parse_bexp(&out); out = eat(&out, Token::Then); out = parse_stmt(&out); out = eat(&out, Token::Else); out = parse_stmt(&out)},
         Token::While => {out = eat(input, Token::While); out = parse_bexp(&out); out = eat(&out, Token::Do); out = parse_stmt(&out)},
@@ -43,13 +44,13 @@ fn parse_stmt(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out// temporary!!
+    out
 }
 
 
 fn parse_stmts(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::Dollar => {out = input.clone()},
         Token::RightCurly => {out = input.clone()},
@@ -58,13 +59,13 @@ fn parse_stmts(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out // temporary!!
+    out
 }
 
 
 fn parse_bexp(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::Id(_) => {out = parse_bfac(input); out = parse_bexps(&out)},
         Token::Not => {out = parse_bfac(input); out = parse_bexps(&out)},
@@ -76,12 +77,12 @@ fn parse_bexp(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out // temporary!!
+    out
 }
 
 fn parse_bexps(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::Then => {out = input.clone()},
         Token::Do => {out = input.clone()},
@@ -91,13 +92,13 @@ fn parse_bexps(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out // temporary!!
+    out
 }
 
 
 fn parse_bfac(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::Id(_) => {out = parse_bneg(input); out = parse_bfacs(&out)},
         Token::Not => {out = parse_bneg(input); out = parse_bfacs(&out)},
@@ -109,12 +110,12 @@ fn parse_bfac(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out // temporary!!
+    out
 }
 
 fn parse_bfacs(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::Then => {out = input.clone()},
         Token::Do => {out = input.clone()},
@@ -125,12 +126,12 @@ fn parse_bfacs(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out // temporary!!
+    out
 }
 
 fn parse_bneg(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::Id(_) => {out = parse_brel(input)},
         Token::Not => {out = eat(input, Token::Not); out = parse_bneg(&out)},
@@ -142,13 +143,13 @@ fn parse_bneg(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out // temporary!!
+    out
 }
 
 
 fn parse_brel(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::Id(_) => {out = parse_aexp(input); out = parse_brels(&out)},
         Token::Num(_) => {out = parse_aexp(input); out = parse_brels(&out)},
@@ -159,13 +160,13 @@ fn parse_brel(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out // temporary!!
+    out
 }
 
 
 fn parse_brels(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::Then => {out = input.clone()},
         Token::Do => {out = input.clone()},
@@ -178,13 +179,13 @@ fn parse_brels(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out // temporary!!
+    out
 }
 
 
 fn parse_aexp(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::Id(_) => {out = parse_afac(input); out = parse_aexps(&out)},
         Token::Num(_) => {out = parse_afac(input); out = parse_aexps(&out)},
@@ -195,13 +196,13 @@ fn parse_aexp(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out // temporary!!
+    out
 }
 
 
 fn parse_aexps(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::Dollar => {out = input.clone()},
         Token::Then =>{out = input.clone()},
@@ -220,12 +221,12 @@ fn parse_aexps(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out // temporary!!
+    out
 }
 
 fn parse_afac(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::Id(_) => {out = parse_atom(input); out = parse_afacs(&out)},
         Token::Num(_) => {out = parse_atom(input); out = parse_afacs(&out)},
@@ -236,12 +237,12 @@ fn parse_afac(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out // temporary!!
+    out
 }
 
 fn parse_afacs(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::Dollar => {out = input.clone()},
         Token::Then => {out = input.clone()},
@@ -261,11 +262,11 @@ fn parse_afacs(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out // temporary!!
+    out
 }
 fn parse_atom(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(&input).unwrap();
-    let mut out = VecDeque::new();
+    let c = peek(input).unwrap();
+    let mut out: VecDeque<Token>;
     match c {
         Token::Id(s) => {out = eat(input, Token::Id(s))},
         Token::Num(s) => {out = eat(input, Token::Num(s))},
@@ -276,7 +277,7 @@ fn parse_atom(input: &VecDeque<Token>) ->VecDeque<Token> {
 
     };
 
-    out // temporary!!
+    out
 }
 
 pub fn recognise(input: &VecDeque<Token>) {
