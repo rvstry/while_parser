@@ -1,285 +1,253 @@
 use std::collections::VecDeque;
 use crate::token::Token;
 
-fn peek(input: &VecDeque<Token>) -> Option<Token> {
-    input.front().cloned()
-
+struct Recogniser {
+    input: VecDeque<Token>,
 }
 
-fn eat(input: &VecDeque<Token>, tk: Token) ->VecDeque<Token>{
-    if tk == peek(input).unwrap() {
-        // consume
-        let mut p = input.clone();
-        p.split_off(1)
+impl Recogniser {
+
+    fn init(s: VecDeque<Token>) -> Self {
+        Self {input: s,}
     }
-    else {panic!()}
 
+
+    fn peek(&self) -> Option<Token> {
+        self.input.front().cloned()
+
+    }
+
+    fn eat(&mut self, tk: Token) {
+        if tk == self.peek().unwrap() {
+            // consume
+            let mut p = self.input.clone();
+            self.input = p.split_off(1);
+        }
+        else {panic!()}
+
+    }
+
+    fn parse_prog(&mut self) {
+        let c = self.peek().unwrap();
+        match c {
+            Token::If => { self.parse_stmt(); self.parse_stmts(); self.eat(Token::Dollar)},
+            Token::While => { self.parse_stmt(); self.parse_stmts(); self.eat(Token::Dollar)},
+            Token::Skip => { self.parse_stmt(); self.parse_stmts(); self.eat(Token::Dollar)},
+            Token::Id(_) => { self.parse_stmt(); self.parse_stmts(); self.eat(Token::Dollar)},
+            Token::LeftCurly => { self.parse_stmt(); self.parse_stmts(); self.eat(Token::Dollar)},
+            _ => panic!(),
+        };
+    }
+
+    fn parse_stmt(&mut self)  {
+        let c = self.peek().unwrap();
+        match c {
+            Token::If => {self.eat(Token::If); self.parse_bexp(); self.eat(Token::Then); self.parse_stmt(); self.eat(Token::Else); self.parse_stmt()},
+            Token::While => {self.eat(Token::While); self.parse_bexp(); self.eat(Token::Do); self.parse_stmt()},
+            Token::Skip => {self.eat(Token::Skip)},
+            Token::Id(s) => {self.eat(Token::Id(s)); self.eat(Token::Assignment); self.parse_aexp()},
+            Token::LeftCurly => {self.eat(Token::LeftCurly); self.parse_stmt();self.parse_stmts(); self.eat(Token::RightCurly)},
+            _ => panic!(),
+
+        };
+    }
+
+
+    fn parse_stmts(&mut self)  {
+        let c = self.peek().unwrap();
+        match c {
+            Token::Dollar => {},
+            Token::RightCurly => {},
+            Token::Semicolon => {self.eat(Token::Semicolon); self.parse_stmt(); self.parse_stmts();},
+            _ => panic!(),
+
+        };
+    }
+
+
+    fn parse_bexp(&mut self) {
+        let c = self.peek().unwrap();
+        match c {
+            Token::Id(_) => {self.parse_bfac(); self.parse_bexps()},
+            Token::Not => {self.parse_bfac(); self.parse_bexps()},
+            Token::Num(_) => {self.parse_bfac(); self.parse_bexps()},
+            Token::True => {self.parse_bfac(); self.parse_bexps()},
+            Token::False => {self.parse_bfac(); self.parse_bexps()},
+            Token::LeftParenthesis => {self.parse_bfac(); self.parse_bexps()},
+            _ => panic!(),
+
+        };
+    }
+
+    fn parse_bexps(&mut self) {
+        let c = self.peek().unwrap();
+        match c {
+            Token::Then => {},
+            Token::Do => {},
+            Token::Or => {self.eat(Token::Or); self.parse_bfac(); self.parse_bexps()},
+            Token::RightParenthesis => {},
+            _ => panic!(),
+
+        };
+    }
+
+
+    fn parse_bfac(&mut self) {
+        let c = self.peek().unwrap();
+        match c {
+            Token::Id(_) => {self.parse_bneg(); self.parse_bfacs()},
+            Token::Not => {self.parse_bneg(); self.parse_bfacs()},
+            Token::Num(_) => {self.parse_bneg();self.parse_bfacs()},
+            Token::True => {self.parse_bneg(); self.parse_bfacs()},
+            Token::False => {self.parse_bneg(); self.parse_bfacs()},
+            Token::LeftParenthesis => {self.parse_bneg(); self.parse_bfacs()},
+            _ => panic!(),
+
+        };
+    }
+
+    fn parse_bfacs(&mut self)  {
+        let c = self.peek().unwrap();
+        match c {
+            Token::Then => {},
+            Token::Do => {},
+            Token::Or => {},
+            Token::And => {self.eat(Token::And); self.parse_bneg(); self.parse_bfacs()},
+            Token::RightParenthesis => {},
+            _ => panic!(),
+
+        };
+    }
+
+    fn parse_bneg(&mut self) {
+        let c = self.peek().unwrap();
+        match c {
+            Token::Id(_) => {self.parse_brel()},
+            Token::Not => {self.eat(Token::Not); self.parse_bneg()},
+            Token::Num(_) => {self.parse_brel()},
+            Token::True => {self.parse_brel()},
+            Token::False => {self.parse_brel()},
+            Token::LeftParenthesis => {self.parse_brel()},
+            _ => panic!(),
+
+        };
+    }
+
+
+    fn parse_brel(&mut self) {
+        let c = self.peek().unwrap();
+        match c {
+            Token::Id(_) => {self.parse_aexp(); self.parse_brels()},
+            Token::Num(_) => {self.parse_aexp(); self.parse_brels()},
+            Token::True => {self.parse_aexp(); self.parse_brels()},
+            Token::False => {self.parse_aexp(); self.parse_brels()},
+            Token::LeftParenthesis => {self.parse_aexp(); self.parse_brels()},
+            _ => panic!(),
+
+        };
+    }
+
+
+    fn parse_brels(&mut self) {
+        let c = self.peek().unwrap();
+        match c {
+            Token::Then => {},
+            Token::Do => {},
+            Token::Or => {},
+            Token::And => {},
+            Token::LessThan => {self.eat(Token::LessThan); self.parse_aexp()},
+            Token::Equals => {self.eat(Token::Equals); self.parse_aexp()},
+            Token::RightParenthesis => {},
+            _ => panic!(),
+
+        };
+    }
+
+
+    fn parse_aexp(&mut self) {
+        let c = self.peek().unwrap();
+        match c {
+            Token::Id(_) => {self.parse_afac(); self.parse_aexps()},
+            Token::Num(_) => {self.parse_afac(); self.parse_aexps()},
+            Token::True => {self.parse_afac(); self.parse_aexps()},
+            Token::False => {self.parse_afac(); self.parse_aexps()},
+            Token::LeftParenthesis => {self.parse_afac(); self.parse_aexps()},
+            _ => panic!(),
+
+        };
+    }
+
+
+    fn parse_aexps(&mut self) {
+        let c = self.peek().unwrap();
+        match c {
+            Token::Dollar => {},
+            Token::Then =>{},
+            Token::Else => {},
+            Token::Do => {},
+            Token::RightCurly => {},
+            Token::Semicolon => {},
+            Token::Or => {},
+            Token::And => {},
+            Token::LessThan => {},
+            Token::Equals => {},
+            Token::Plus => {self.eat(Token::Plus);self.parse_afac(); self.parse_aexps()},
+            Token::Minus => {self.eat(Token::Minus); self.parse_afac(); self.parse_aexps()},
+            Token::RightParenthesis => {},
+            _ => panic!(),
+
+        };
+    }
+
+    fn parse_afac(&mut self) {
+        let c = self.peek().unwrap();
+        match c {
+            Token::Id(_) => {self.parse_atom(); self.parse_afacs()},
+            Token::Num(_) => {self.parse_atom(); self.parse_afacs()},
+            Token::True => {self.parse_atom(); self.parse_afacs()},
+            Token::False => {self.parse_atom(); self.parse_afacs()},
+            Token::LeftParenthesis => {self.parse_atom(); self.parse_afacs()},
+            _ => panic!(),
+
+        };
+    }
+
+    fn parse_afacs(&mut self) {
+        let c = self.peek().unwrap();
+        match c {
+            Token::Dollar => {},
+            Token::Then => {},
+            Token::Else => {},
+            Token::Do => {},
+            Token::RightCurly => {},
+            Token::Semicolon => {},
+            Token::Or => {},
+            Token::And => {},
+            Token::LessThan =>{},
+            Token::Equals =>{},
+            Token::Plus => {},
+            Token::Minus => {},
+            Token::Asterisk => {self.eat(Token::Asterisk); self.parse_atom(); self.parse_afacs()},
+            Token::RightParenthesis => {},
+            _ => panic!(),
+
+        };
+    }
+    fn parse_atom(&mut self) {
+        let c = self.peek().unwrap();
+        match c {
+            Token::Id(s) => {self.eat(Token::Id(s))},
+            Token::Num(s) => {self.eat(Token::Num(s))},
+            Token::True => {self.eat(Token::True)},
+            Token::False => {self.eat(Token::False)},
+            Token::LeftParenthesis => {self.eat(Token::LeftParenthesis); self.parse_bexp(); self.eat(Token::RightParenthesis)},
+            _ => panic!(),
+
+        };
 }
-
-fn parse_prog(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::If => { out = parse_stmt(input); out = parse_stmts(&out); out = eat(&out, Token::Dollar)},
-        Token::While => { out = parse_stmt(input); out = parse_stmts(&out); out = eat(&out, Token::Dollar)},
-        Token::Skip => { out = parse_stmt(input); out = parse_stmts(&out); out = eat(&out, Token::Dollar)},
-        Token::Id(_) => { out = parse_stmt(input); out = parse_stmts(&out); out = eat(&out, Token::Dollar)},
-        Token::LeftCurly => { out = parse_stmt(input); out = parse_stmts(&out); out = eat(&out, Token::Dollar)},
-        _ => panic!(),
-    };
-
-    out
-}
-
-fn parse_stmt(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::If => {out = eat(input, Token::If); out = parse_bexp(&out); out = eat(&out, Token::Then); out = parse_stmt(&out); out = eat(&out, Token::Else); out = parse_stmt(&out)},
-        Token::While => {out = eat(input, Token::While); out = parse_bexp(&out); out = eat(&out, Token::Do); out = parse_stmt(&out)},
-        Token::Skip => {out = eat(input, Token::Skip)},
-        Token::Id(s) => {out = eat(input, Token::Id(s)); out = eat(&out, Token::Assignment); out = parse_aexp(&out)},
-        Token::LeftCurly => {out = eat(input, Token::LeftCurly); out = parse_stmt(&out); out = parse_stmts(&out); out = eat(&out, Token::RightCurly)},
-        _ => panic!(),
-
-    };
-
-    out
-}
-
-
-fn parse_stmts(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::Dollar => {out = input.clone()},
-        Token::RightCurly => {out = input.clone()},
-        Token::Semicolon => {out = eat(input, Token::Semicolon); out = parse_stmt(&out); out = parse_stmts(&out)},
-        _ => panic!(),
-
-    };
-
-    out
-}
-
-
-fn parse_bexp(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::Id(_) => {out = parse_bfac(input); out = parse_bexps(&out)},
-        Token::Not => {out = parse_bfac(input); out = parse_bexps(&out)},
-        Token::Num(_) => {out = parse_bfac(input); out = parse_bexps(&out)},
-        Token::True => {out = parse_bfac(input); out = parse_bexps(&out)},
-        Token::False => {out = parse_bfac(input); out = parse_bexps(&out)},
-        Token::LeftParenthesis => {out = parse_bfac(input); out = parse_bexps(&out)},
-        _ => panic!(),
-
-    };
-
-    out
-}
-
-fn parse_bexps(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::Then => {out = input.clone()},
-        Token::Do => {out = input.clone()},
-        Token::Or => {out = eat(input, Token::Or); out = parse_bfac(&out); out = parse_bexps(&out)},
-        Token::RightParenthesis => {out = input.clone()},
-        _ => panic!(),
-
-    };
-
-    out
-}
-
-
-fn parse_bfac(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::Id(_) => {out = parse_bneg(input); out = parse_bfacs(&out)},
-        Token::Not => {out = parse_bneg(input); out = parse_bfacs(&out)},
-        Token::Num(_) => {out = parse_bneg(input); out = parse_bfacs(&out)},
-        Token::True => {out = parse_bneg(input); out = parse_bfacs(&out)},
-        Token::False => {out = parse_bneg(input); out = parse_bfacs(&out)},
-        Token::LeftParenthesis => {out = parse_bneg(input); out = parse_bfacs(&out)},
-        _ => panic!(),
-
-    };
-
-    out
-}
-
-fn parse_bfacs(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::Then => {out = input.clone()},
-        Token::Do => {out = input.clone()},
-        Token::Or => {out = input.clone()},
-        Token::And => {out = eat(input, Token::And); out = parse_bneg(&out); out = parse_bfacs(&out)},
-        Token::RightParenthesis => {out = input.clone()},
-        _ => panic!(),
-
-    };
-
-    out
-}
-
-fn parse_bneg(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::Id(_) => {out = parse_brel(input)},
-        Token::Not => {out = eat(input, Token::Not); out = parse_bneg(&out)},
-        Token::Num(_) => {out = parse_brel(input)},
-        Token::True => {out = parse_brel(input)},
-        Token::False => {out = parse_brel(input)},
-        Token::LeftParenthesis => {out = parse_brel(input)},
-        _ => panic!(),
-
-    };
-
-    out
-}
-
-
-fn parse_brel(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::Id(_) => {out = parse_aexp(input); out = parse_brels(&out)},
-        Token::Num(_) => {out = parse_aexp(input); out = parse_brels(&out)},
-        Token::True => {out = parse_aexp(input); out = parse_brels(&out)},
-        Token::False => {out = parse_aexp(input); out = parse_brels(&out)},
-        Token::LeftParenthesis => {out = parse_aexp(input); out = parse_brels(&out)},
-        _ => panic!(),
-
-    };
-
-    out
-}
-
-
-fn parse_brels(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::Then => {out = input.clone()},
-        Token::Do => {out = input.clone()},
-        Token::Or => {out = input.clone()},
-        Token::And => {out = input.clone()},
-        Token::LessThan => {out = eat(input, Token::LessThan); out = parse_aexp(&out)},
-        Token::Equals => {out = eat(input, Token::Equals); out = parse_aexp(&out)},
-        Token::RightParenthesis => {out = input.clone()},
-        _ => panic!(),
-
-    };
-
-    out
-}
-
-
-fn parse_aexp(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::Id(_) => {out = parse_afac(input); out = parse_aexps(&out)},
-        Token::Num(_) => {out = parse_afac(input); out = parse_aexps(&out)},
-        Token::True => {out = parse_afac(input); out = parse_aexps(&out)},
-        Token::False => {out = parse_afac(input); out = parse_aexps(&out)},
-        Token::LeftParenthesis => {out = parse_afac(input); out = parse_aexps(&out)},
-        _ => panic!(),
-
-    };
-
-    out
-}
-
-
-fn parse_aexps(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::Dollar => {out = input.clone()},
-        Token::Then =>{out = input.clone()},
-        Token::Else => {out = input.clone()},
-        Token::Do => {out = input.clone()},
-        Token::RightCurly => {out = input.clone()},
-        Token::Semicolon => {out = input.clone()},
-        Token::Or => {out = input.clone()},
-        Token::And => {out = input.clone()},
-        Token::LessThan => {out = input.clone()},
-        Token::Equals => {out = input.clone()},
-        Token::Plus => {out = eat(input, Token::Plus); out = parse_afac(&out); out = parse_aexps(&out)},
-        Token::Minus => {out = eat(input, Token::Minus); out = parse_afac(&out); out = parse_aexps(&out)},
-        Token::RightParenthesis => {out = input.clone()},
-        _ => panic!(),
-
-    };
-
-    out
-}
-
-fn parse_afac(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::Id(_) => {out = parse_atom(input); out = parse_afacs(&out)},
-        Token::Num(_) => {out = parse_atom(input); out = parse_afacs(&out)},
-        Token::True => {out = parse_atom(input); out = parse_afacs(&out)},
-        Token::False => {out = parse_atom(input); out = parse_afacs(&out)},
-        Token::LeftParenthesis => {out = parse_atom(input); out = parse_afacs(&out)},
-        _ => panic!(),
-
-    };
-
-    out
-}
-
-fn parse_afacs(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::Dollar => {out = input.clone()},
-        Token::Then => {out = input.clone()},
-        Token::Else => {out = input.clone()},
-        Token::Do => {out = input.clone()},
-        Token::RightCurly => {out = input.clone()},
-        Token::Semicolon => {out = input.clone()},
-        Token::Or => {out = input.clone()},
-        Token::And => {out = input.clone()},
-        Token::LessThan =>{out = input.clone()},
-        Token::Equals =>{out = input.clone()},
-        Token::Plus => {out = input.clone()},
-        Token::Minus => {out = input.clone()},
-        Token::Asterisk => {out = eat(input, Token::Asterisk); out = parse_atom(&out); out = parse_afacs(&out)},
-        Token::RightParenthesis => {out = input.clone()},
-        _ => panic!(),
-
-    };
-
-    out
-}
-fn parse_atom(input: &VecDeque<Token>) ->VecDeque<Token> {
-    let c = peek(input).unwrap();
-    let mut out: VecDeque<Token>;
-    match c {
-        Token::Id(s) => {out = eat(input, Token::Id(s))},
-        Token::Num(s) => {out = eat(input, Token::Num(s))},
-        Token::True => {out = eat(input, Token::True)},
-        Token::False => {out = eat(input, Token::False)},
-        Token::LeftParenthesis => {out =  eat(input, Token::LeftParenthesis); out = parse_bexp(&out); out = eat(&out, Token::RightParenthesis)},
-        _ => panic!(),
-
-    };
-
-    out
 }
 
 pub fn recognise(input: &VecDeque<Token>) {
-    parse_prog(input);
+    let mut recogniser = Recogniser::init(input.clone());
+    recogniser.parse_prog(); // all programs must start with prog
 }
