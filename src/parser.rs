@@ -319,12 +319,12 @@ impl Parser {
             Token::LessThan => {/**/Ok(sub)},
             Token::Equals => {/**/Ok(sub)},
             Token::Plus => {
-                self.eat(Token::Plus)?; let s1 = self.parse_afac()?; let s2 = self.parse_aexps(s1)?;
-                Ok(Exp::Plus(Box::new(sub), Box::new(s2)))
+                self.eat(Token::Plus)?; let s1 = self.parse_afac()?; let s2 = self.parse_aexps(Exp::Plus(Box::new(sub), Box::new(s1)))?;
+                Ok(s2)
             },
             Token::Minus => {
-                self.eat(Token::Minus)?; let s1 = self.parse_afac()?; let s2 = self.parse_aexps(s1)?;
-                Ok(Exp::Minus(Box::new(sub), Box::new(s2)))
+                self.eat(Token::Minus)?; let s1 = self.parse_afac()?; let s2 = self.parse_aexps(Exp::Minus(Box::new(sub), Box::new(s1)))?;
+                Ok(s2)
             },
             Token::RightParenthesis => {/**/Ok(sub)},
             _ => Err(ParseError::ParseAExpsError),
