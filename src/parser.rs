@@ -6,6 +6,7 @@ struct Parser {
     input: VecDeque<Token>,
 }
 
+#[derive(Debug)]
 enum WhileError {
     ParseError,
 }
@@ -415,7 +416,7 @@ impl Parser {
 }
 }
 
-pub fn recognise(input: &VecDeque<Token>) {
+pub fn parse(input: &VecDeque<Token>) -> Result<Stmt, WhileError> {
     let mut parser = Parser::init(input.clone());
-    parser.parse_prog(); // all programs must start with prog
+     parser.parse_prog() // all programs must start with prog
 }
