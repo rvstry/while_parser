@@ -1,6 +1,7 @@
 #[derive(Debug)]
 pub enum ParseError {
     // ParseError,
+    TokenError,
     ParseProgError,
     ParseStmtError,
     ParseStmtsError,
