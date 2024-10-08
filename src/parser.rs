@@ -7,7 +7,7 @@ struct Parser {
 }
 
 #[derive(Debug)]
-enum WhileError {
+pub enum WhileError {
     ParseError,
 }
 
