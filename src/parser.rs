@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 use crate::token::Token;
 use crate::ast::*;
 
-struct Recogniser {
+struct Parser {
     input: VecDeque<Token>,
 }
 
@@ -10,7 +10,7 @@ enum WhileError {
     ParseError,
 }
 
-impl Recogniser {
+impl Parser {
 
     fn init(s: VecDeque<Token>) -> Self {
         Self {input: s,}
@@ -416,6 +416,6 @@ impl Recogniser {
 }
 
 pub fn recognise(input: &VecDeque<Token>) {
-    let mut recogniser = Recogniser::init(input.clone());
-    recogniser.parse_prog(); // all programs must start with prog
+    let mut parser = Parser::init(input.clone());
+    parser.parse_prog(); // all programs must start with prog
 }
