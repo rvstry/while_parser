@@ -12,8 +12,8 @@ fn main() {
                         "while y + 3 < 2 do y <- y + 1; x <- 0",
                         "y <- y + 1; x <- 0;",
                         "whiley <- (iff + sskip) * doo - thenn",
-                        "x <- a && b",
-                        "x <- a || b",
+                        "while a && b && c do skip",
+                        "while a || b || c do skip",
                         "x <- a + b + c",
                         "x <- a - b - c",
                        ];
