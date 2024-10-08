@@ -1,14 +1,10 @@
 use std::collections::VecDeque;
 use crate::token::Token;
 use crate::ast::*;
+use crate::error::ParseError;
 
 struct Parser {
     input: VecDeque<Token>,
-}
-
-#[derive(Debug)]
-pub enum WhileError {
-    ParseError,
 }
 
 impl Parser {
@@ -33,7 +29,7 @@ impl Parser {
 
     }
 
-    fn parse_prog(&mut self) -> Result<Stmt, WhileError> {
+    fn parse_prog(&mut self) -> Result<Stmt, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::If => {
@@ -56,11 +52,11 @@ impl Parser {
                 let st1 = self.parse_stmt()?; let st2 = self.parse_stmts(st1); self.eat(Token::Dollar);
                 st2
              },
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseProgError),
         }
     }
 
-    fn parse_stmt(&mut self) -> Result<Stmt, WhileError> {
+    fn parse_stmt(&mut self) -> Result<Stmt, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::If => {
@@ -83,13 +79,13 @@ impl Parser {
                 self.eat(Token::LeftCurly); let s1 = self.parse_stmt()?; let s2 = self.parse_stmts(s1); self.eat(Token::RightCurly);
                 s2
             },
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseStmtError),
 
         }
     }
 
 
-    fn parse_stmts(&mut self, sub: Stmt/*impl Ast*/) -> Result<Stmt, WhileError>  {
+    fn parse_stmts(&mut self, sub: Stmt/*impl Ast*/) -> Result<Stmt, ParseError>  {
         let c = self.peek().unwrap();
         match c {
             Token::Dollar => {/**/Ok(sub)},
@@ -98,13 +94,13 @@ impl Parser {
                 self.eat(Token::Semicolon); let s1 = self.parse_stmt()?; let s2 = self.parse_stmts(s1)?;
                 Ok(Stmt::Seq(Box::new(sub), Box::new(s2)))
             },
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseStmtsError),
 
         }
     }
 
 
-    fn parse_bexp(&mut self) -> Result<Exp, WhileError> {
+    fn parse_bexp(&mut self) -> Result<Exp, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::Id(_) => {
@@ -131,12 +127,12 @@ impl Parser {
                 let st1 = self.parse_bfac()?; let st2 = self.parse_bexps(st1);
                 st2
             },
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseBExpError),
 
         }
     }
 
-    fn parse_bexps(&mut self, sub: Exp /*impl Ast*/) -> Result<Exp, WhileError> {
+    fn parse_bexps(&mut self, sub: Exp /*impl Ast*/) -> Result<Exp, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::Then => {/**/Ok(sub)},
@@ -146,13 +142,13 @@ impl Parser {
                 Ok(Exp::Or(Box::new(sub), Box::new(s2)))
             },
             Token::RightParenthesis => {/**/Ok(sub)},
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseBExpsError),
 
         }
     }
 
 
-    fn parse_bfac(&mut self) -> Result<Exp, WhileError> {
+    fn parse_bfac(&mut self) -> Result<Exp, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::Id(_) => {
@@ -179,12 +175,12 @@ impl Parser {
                 let st1 = self.parse_bneg()?; let st2 = self.parse_bfacs(st1);
                 st2
              },
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseBFacError),
 
         }
     }
 
-    fn parse_bfacs(&mut self, sub: Exp/*impl Ast*/) -> Result<Exp, WhileError> {
+    fn parse_bfacs(&mut self, sub: Exp/*impl Ast*/) -> Result<Exp, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::Then => {/**/Ok(sub)},
@@ -195,12 +191,12 @@ impl Parser {
                 Ok(Exp::And(Box::new(sub), Box::new(s2)))
             },
             Token::RightParenthesis => {/**/Ok(sub)},
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseBFacsError),
 
         }
     }
 
-    fn parse_bneg(&mut self) -> Result<Exp, WhileError> {
+    fn parse_bneg(&mut self) -> Result<Exp, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::Id(_) => {
@@ -222,13 +218,13 @@ impl Parser {
             Token::LeftParenthesis => {
                 self.parse_brel()
             },
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseBNegError),
 
         }
     }
 
 
-    fn parse_brel(&mut self) -> Result<Exp, WhileError> {
+    fn parse_brel(&mut self) -> Result<Exp, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::Id(_) => {
@@ -251,13 +247,13 @@ impl Parser {
                 let st1 = self.parse_aexp()?; let st2 = self.parse_brels(st1);
                 st2
             },
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseBRelError),
 
         }
     }
 
 
-    fn parse_brels(&mut self, sub: Exp/*impl Ast*/) -> Result<Exp, WhileError> {
+    fn parse_brels(&mut self, sub: Exp/*impl Ast*/) -> Result<Exp, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::Then => {/**/Ok(sub)},
@@ -273,13 +269,13 @@ impl Parser {
                 Ok(Exp::Eq(Box::new(sub), Box::new(s1)))
             },
             Token::RightParenthesis => {/**/Ok(sub)},
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseBRelsError),
 
         }
     }
 
 
-    fn parse_aexp(&mut self) -> Result<Exp, WhileError> {
+    fn parse_aexp(&mut self) -> Result<Exp, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::Id(_) => {
@@ -302,13 +298,13 @@ impl Parser {
                 let st1 = self.parse_afac()?; let st2 = self.parse_aexps(st1);
                 st2
             },
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseAExpError),
 
         }
     }
 
 
-    fn parse_aexps(&mut self, sub: Exp/*impl Ast*/) -> Result<Exp, WhileError> {
+    fn parse_aexps(&mut self, sub: Exp/*impl Ast*/) -> Result<Exp, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::Dollar => {/**/Ok(sub)},
@@ -330,12 +326,12 @@ impl Parser {
                 Ok(Exp::Minus(Box::new(sub), Box::new(s2)))
             },
             Token::RightParenthesis => {/**/Ok(sub)},
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseAExpsError),
 
         }
     }
 
-    fn parse_afac(&mut self) -> Result<Exp, WhileError> {
+    fn parse_afac(&mut self) -> Result<Exp, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::Id(_) => {
@@ -358,12 +354,12 @@ impl Parser {
                 let st1 = self.parse_atom()?; let st2 = self.parse_afacs(st1);
                 st2
              },
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseAFacError),
 
         }
     }
 
-    fn parse_afacs(&mut self, sub: Exp/*impl Ast*/) -> Result<Exp, WhileError> {
+    fn parse_afacs(&mut self, sub: Exp/*impl Ast*/) -> Result<Exp, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::Dollar => {/**/Ok(sub)},
@@ -383,11 +379,11 @@ impl Parser {
                 Ok(Exp::Times(Box::new(sub), Box::new(s2)))
             },
             Token::RightParenthesis => {/**/Ok(sub)},
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseAFacsError),
 
         }
     }
-    fn parse_atom(&mut self) -> Result<Exp, WhileError> {
+    fn parse_atom(&mut self) -> Result<Exp, ParseError> {
         let c = self.peek().unwrap();
         match c {
             Token::Id(s) => {
@@ -410,13 +406,13 @@ impl Parser {
                 self.eat(Token::LeftParenthesis); let st = self.parse_bexp()?; self.eat(Token::RightParenthesis);
                 Ok(st)
             },
-            _ => Err(WhileError::ParseError),
+            _ => Err(ParseError::ParseAtomError),
 
         }
 }
 }
 
-pub fn parse(input: &VecDeque<Token>) -> Result<Stmt, WhileError> {
+pub fn parse(input: &VecDeque<Token>) -> Result<Stmt, ParseError> {
     let mut parser = Parser::init(input.clone());
      parser.parse_prog() // all programs must start with prog
 }
