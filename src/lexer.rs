@@ -7,7 +7,7 @@ fn peek(input: &VecDeque<u8>) -> Option<u8> {
 
 }
 fn eat(input: &VecDeque<u8>, c: u8) -> Result<VecDeque<u8>, LexError> {
-    if c == peek(input).unwrap() {
+    if c == peek(input).ok_or(LexError::WhileError)? {
         // consume
         let mut p = input.clone();
         Ok(p.split_off(1))
@@ -23,7 +23,7 @@ fn lex_number(input: &VecDeque<u8>) -> Result<(Token, VecDeque<u8>), LexError> {
     let mut lexeme: VecDeque<u8> = VecDeque::new();
     let mut i = input.to_owned();
     while is_more(&i) {
-        let c = peek(&i).unwrap();
+        let c = peek(&i).ok_or(LexError::WhileError)?;
         if c.is_ascii_digit() {
             i = eat(&i, c)?;
             lexeme.push_back(c);
@@ -38,7 +38,7 @@ fn lex_kw_or_id(input: &VecDeque<u8>) -> Result<(Token, VecDeque<u8>), LexError>
     let mut lexeme: VecDeque<u8> = VecDeque::new();
     let mut i = input.to_owned();
     while is_more(&i) {
-        let c = peek(&i).unwrap();
+        let c = peek(&i).ok_or(LexError::WhileError)?;
         if c.is_ascii_alphanumeric() || c == 0x27 {
             i = eat(&i, c)?;
             lexeme.push_back(c);
@@ -67,11 +67,7 @@ pub fn lex(s: VecDeque<u8>) -> Result<VecDeque<Token>, LexError> {
 
     let mut i = s.to_owned();
     while is_more(&i) {
-        let x = peek(&i);
-        let c = match x {
-            Some(a) => a,
-            None => break
-        };
+        let c = peek(&i).ok_or(LexError::WhileError)?;
 
         match c as char {
             '=' => {i = eat(&i, b'=')?; tokens.push_back(Token::Equals)},
@@ -82,7 +78,7 @@ pub fn lex(s: VecDeque<u8>) -> Result<VecDeque<Token>, LexError> {
             '|' => {i = eat(&i, b'|')?; i = eat(&i, b'|')?; tokens.push_back(Token::Or)}
             '<' => {
                 i = eat(&i, b'<')?;
-                if peek(&i).unwrap() as char == '-' {
+                if peek(&i).ok_or(LexError::WhileError)? as char == '-' {
                     i = eat(&i, b'-')?;
                     tokens.push_back(Token::Assignment)
                 }
