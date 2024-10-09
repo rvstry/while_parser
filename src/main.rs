@@ -5,7 +5,6 @@ mod parser;
 mod token;
 
 fn main() {
-    println!("Hello, world!");
     let test_strings = ["myVar <- x * (foo + bar)",
                         "while true do skip",
                         "if x <= 3 then x <- x - 1 else y <- y + 1",

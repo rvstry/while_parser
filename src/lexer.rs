@@ -112,7 +112,6 @@ pub fn lex(s: VecDeque<u8>) -> Result<VecDeque<Token>, LexError> {
 
     }
     tokens.push_back(Token::Dollar);
-    println!("{:?}", tokens);
 
     Ok(tokens)
 }
