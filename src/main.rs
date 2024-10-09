@@ -18,12 +18,18 @@ fn main() {
                        ];
 
     for s in test_strings {
-        let ts = lexer::lex(s.as_bytes().to_vec().into()).unwrap();
-        let r = parser::parse(&ts);
-        match r {
-            Ok(ref a) => println!("PARSE SUCCESS!\nString: \"{:?}\"\nTokens: {:?}\nAST: {:?}\n", s, ts, a),
-            Err(ref a) => println!("PARSE FAIL!\nString: \"{:?}\"\nError: {:?}\n", s,/* r,*/ a),
-
-        }
+        println!("String: {}", s);
+        let ts = lexer::lex(s.as_bytes().to_vec().into());
+        match ts {
+            Ok(ref a) => {
+                println!("LEX SUCCESS!\nTokens: {:?}", a);
+                let r = parser::parse(a);
+                match r {
+                    Ok(ref b) => println!("PARSE SUCCESS!\nAST: {:?}\n", b),
+                    Err(ref b) => println!("PARSE FAIL!\n{:?}\n", b),
+                }
+            },
+            Err(ref a) => println!("LEX FAIL!\n{:?}", a),
+        };
     }
 }
