@@ -1,4 +1,9 @@
 #[derive(Debug)]
+pub enum LexError {
+    WhileError,
+}
+
+#[derive(Debug)]
 pub enum ParseError {
     // ParseError,
     TokenError,

@@ -19,7 +19,7 @@ fn main() {
                        ];
 
     for s in test_strings {
-        let ts = lexer::lex(s.as_bytes().to_vec().into());
+        let ts = lexer::lex(s.as_bytes().to_vec().into()).unwrap();
         let r = parser::parse(&ts);
         match r {
             Ok(ref a) => println!("PARSE SUCCESS!\nString: \"{:?}\"\nTokens: {:?}\nAST: {:?}\n", s, ts, a),
