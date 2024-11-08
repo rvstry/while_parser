@@ -22,14 +22,14 @@ fn main() {
         let ts = lexer::lex(s.as_bytes().to_vec().into());
         match ts {
             Ok(ref a) => {
-                println!("LEX SUCCESS!\nTokens: {:?}", a);
+                println!("Tokens: {:?}", a);
                 let r = parser::parse(a);
                 match r {
-                    Ok(ref b) => println!("PARSE SUCCESS!\nAST: {:?}\n", b),
-                    Err(ref b) => println!("PARSE FAIL!\n{:?}\n", b),
+                    Ok(ref b) => println!("AST: {:?}\n", b),
+                    Err(ref b) => println!("{:?}\n", b),
                 }
             },
-            Err(ref a) => println!("LEX FAIL!\n{:?}", a),
+            Err(ref a) => println!("{:?}", a),
         };
     }
 }
