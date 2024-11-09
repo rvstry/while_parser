@@ -19,7 +19,7 @@ fn main() {
 
     for s in test_strings {
         println!("String: {}", s);
-        let ts = lexer::lex(s.as_bytes().to_vec().into());
+        let ts = lexer::lex(s);
         match ts {
             Ok(ref a) => {
                 println!("Tokens: {:?}", a);
