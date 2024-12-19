@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::ast::{Exp, Stmt};
+use crate::ast::Exp;
 
 #[derive(Eq,Hash, PartialEq)]
 enum Variable {
@@ -7,18 +7,18 @@ enum Variable {
     Y,
 }
 
-struct State {
+pub struct State {
     state: HashMap<String, i32>
 }
 
 impl State {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self{
             state: HashMap::new()
         }
     }
 
-    fn lookup_var(&self, var: String) -> i32 {
+    pub fn lookup_var(&self, var: String) -> i32 {
         let lookup = self.state.get(&var).cloned();
         match lookup {
             Some(value) => value,
@@ -26,12 +26,12 @@ impl State {
         }
     }
 
-    fn update_var(&mut self, var: String, value: i32) {
+    pub fn update_var(&mut self, var: String, value: i32) {
         self.state.insert(var, value);
     }
 }
 
-fn evaluate_arithmetic(e: &Exp, s: &State) -> i32 {
+pub fn evaluate_arithmetic(e: &Exp, s: &State) -> i32 {
     match e {
         Exp::Var(x) => s.lookup_var(x.clone()),
         Exp::Num(n) => *n,
@@ -42,7 +42,7 @@ fn evaluate_arithmetic(e: &Exp, s: &State) -> i32 {
     }
 }
 
-fn evaluate_boolean(e: &Exp, s: &State) -> bool {
+pub fn evaluate_boolean(e: &Exp, s: &State) -> bool {
     match e {
         Exp::True => true,
         Exp::False => false,
@@ -53,27 +53,4 @@ fn evaluate_boolean(e: &Exp, s: &State) -> bool {
         Exp::Or(e1, e2) => evaluate_boolean(e1, s) || evaluate_boolean(e2, s),
         _ => panic!()
     }
-}
-
-fn execute_statement(statement: &Stmt, state: &mut State) {
-    match statement {
-        Stmt::Skip => (),
-        Stmt::Assn(x, e) => state.update_var(x.clone(), evaluate_arithmetic(e, state)),
-        Stmt::Seq(s1, s2) => {execute_statement(s1, state); execute_statement(s2, state);},
-        Stmt::Cond(e, s1, s2) => {
-            match evaluate_boolean(e, state) {
-                true => execute_statement(s1, state),
-                false => execute_statement(s2, state),
-            };
-        }
-        Stmt::While(e, s) => {
-                match evaluate_boolean(e, state) {
-                    false => (),
-                    true => {
-                        execute_statement(s, state);
-                        execute_statement(statement, state);
-                }
-            }
-        }
-    };
 }

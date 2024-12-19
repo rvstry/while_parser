@@ -5,6 +5,7 @@ mod parser;
 mod token;
 
 mod denotational;
+mod operational;
 
 fn main() {
     let test_strings = ["myVar <- x * (foo + bar)",
