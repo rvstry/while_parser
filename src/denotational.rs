@@ -25,6 +25,10 @@ impl State {
             None => 0,
         }
     }
+
+    fn update_var(&mut self, var: String, value: i32) {
+        self.state.insert(var, value);
+    }
 }
 
 fn evaluate_arithmetic(e: &Exp, s: &State) -> i32 {
