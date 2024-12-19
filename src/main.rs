@@ -4,6 +4,8 @@ mod lexer;
 mod parser;
 mod token;
 
+mod denotational;
+
 fn main() {
     let test_strings = ["myVar <- x * (foo + bar)",
                         "while true do skip",
