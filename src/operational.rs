@@ -1,7 +1,7 @@
 use crate::ast::Stmt;
 use crate::denotational::{State, evaluate_arithmetic, evaluate_boolean};
 
-fn execute_statement(statement: &Stmt, state: &mut State) {
+pub fn execute_statement(statement: &Stmt, state: &mut State) {
     match statement {
         Stmt::Skip => (),
         Stmt::Assn(x, e) => state.update_var(x.clone(), evaluate_arithmetic(e, state)),
