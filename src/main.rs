@@ -8,31 +8,43 @@ mod denotational;
 mod operational;
 
 fn main() {
-    let test_strings = ["myVar <- x * (foo + bar)",
-                        "while true do skip",
-                        "if x <= 3 then x <- x - 1 else y <- y + 1",
-                        "while y + 3 < 2 do y <- y + 1; x <- 0",
-                        "y <- y + 1; x <- 0;",
-                        "whiley <- (iff + sskip) * doo - thenn",
-                        "while a && b && c do skip",
-                        "while a || b || c do skip",
-                        "x <- a + b + c",
-                        "x <- a - b - c",
-                       ];
 
-    for s in test_strings {
-        println!("String: {}", s);
-        let ts = lexer::lex(s);
-        match ts {
-            Ok(ref a) => {
-                println!("Tokens: {:?}", a);
-                let r = parser::parse(a);
-                match r {
-                    Ok(ref b) => println!("AST: {:?}\n", b),
-                    Err(ref b) => println!("{:?}\n", b),
-                }
-            },
-            Err(ref a) => println!("{:?}", a),
-        };
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_all() {
+        assert_eq!("This does not actually test anything", "");
+
+        let test_strings = ["myVar <- x * (foo + bar)",
+                            "while true do skip",
+                            "if x <= 3 then x <- x - 1 else y <- y + 1",
+                            "while y + 3 < 2 do y <- y + 1; x <- 0",
+                            "y <- y + 1; x <- 0;",
+                            "whiley <- (iff + sskip) * doo - thenn",
+                            "while a && b && c do skip",
+                            "while a || b || c do skip",
+                            "x <- a + b + c",
+                            "x <- a - b - c",
+                        ];
+
+        for s in test_strings {
+            println!("String: {}", s);
+            let ts = lexer::lex(s);
+            match ts {
+                Ok(ref a) => {
+                    println!("Tokens: {:?}", a);
+                    let r = parser::parse(a);
+                    match r {
+                        Ok(ref b) => println!("AST: {:?}\n", b),
+                        Err(ref b) => println!("{:?}\n", b),
+                    }
+                },
+                Err(ref a) => println!("{:?}", a),
+            };
+        }
     }
 }
