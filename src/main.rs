@@ -13,9 +13,9 @@ fn main() {
     let mut state = denotational::State::new();
     state.update_var("x".to_string(), 5);
 
-    println!("Initial state: {:?}", state);
+    println!("Initial state: {}", state);
     operational::execute_statement(&ast, &mut state).unwrap();
-    println!("Final state: {:?}", state);
+    println!("Final state: {}", state);
 }
 
 #[cfg(test)]

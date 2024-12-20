@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use crate::ast::Exp;
 use crate::error::DenotationError;
+use std::fmt;
 
 #[derive(Eq,Hash, PartialEq)]
 enum Variable {
@@ -30,6 +31,13 @@ impl State {
 
     pub fn update_var(&mut self, var: String, value: i32) {
         self.state.insert(var, value);
+    }
+}
+
+impl fmt::Display for State {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mappings: Vec<String> = self.state.iter().map(|(var, val)| {format!("{} \u{21A6} {}", var, val)}).collect();
+        write!(f, "[{}]", mappings.join(","))
     }
 }
 
