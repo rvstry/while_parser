@@ -1,6 +1,3 @@
-pub trait Ast {
-}
-
 #[derive(Debug, Eq, PartialEq)]
 pub enum Exp {
     True,
@@ -17,8 +14,6 @@ pub enum Exp {
     Times(Box<Exp>, Box<Exp>),
 }
 
-impl Ast for Exp {}
-
 #[derive(Debug, Eq, PartialEq)]
 pub enum Stmt {
     Skip,
@@ -27,5 +22,3 @@ pub enum Stmt {
     Cond(Box<Exp>, Box<Stmt>, Box<Stmt>),
     While(Box<Exp>, Box<Stmt>),
 }
-
-impl Ast for Stmt {}
