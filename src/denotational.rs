@@ -17,10 +17,7 @@ impl State {
 
     pub fn lookup_var(&self, var: String) -> i32 {
         let lookup = self.state.get(&var).cloned();
-        match lookup {
-            Some(value) => value,
-            None => 0,
-        }
+        lookup.unwrap_or(0)
     }
 
     pub fn update_var(&mut self, var: String, value: i32) {
