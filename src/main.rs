@@ -8,9 +8,10 @@ mod denotational;
 mod operational;
 
 fn main() {
-    let tokens = lexer::lex("n <- 42").unwrap();
+    let tokens = lexer::lex("y <- x; while !(y = 1) do {y <- y - 1; x <- y * x}").unwrap();
     let ast = parser::parse(&tokens).unwrap();
     let mut state = denotational::State::new();
+    state.update_var("x".to_string(), 5);
 
     println!("Initial state: {:?}", state);
     operational::execute_statement(&ast, &mut state);
