@@ -5,7 +5,15 @@ use crate::error::OperationError;
 pub fn execute_statement(statement: &Stmt, state: &mut State) -> Result<(), OperationError> {
     match statement {
         Stmt::Skip => Ok(()),
-        Stmt::Assn(x, e) => Ok(state.update_var(x.clone(), evaluate_arithmetic(e, state).unwrap())),
+        Stmt::Assn(x, e) => {
+            match evaluate_arithmetic(e, state) {
+                Ok(a) => {
+                    state.update_var(x.clone(), a);
+                    Ok(())
+                },
+                Err(_) => Err(OperationError::Execution),
+            }
+        },
         Stmt::Seq(s1, s2) => {
             match execute_statement(s1, state) {
                 Err(_) => Err(OperationError::Execution),
