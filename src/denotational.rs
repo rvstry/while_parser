@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::ast::{Arithmetic, Boolean};
+use crate::ast::Exp;
 
 #[derive(Eq,Hash, PartialEq)]
 enum Variable {
@@ -32,24 +32,26 @@ impl State {
     }
 }
 
-pub fn evaluate_arithmetic(e: &Arithmetic, s: &State) -> i32 {
+pub fn evaluate_arithmetic(e: &Exp, s: &State) -> i32 {
     match e {
-        Arithmetic::Var(x) => s.lookup_var(x.clone()),
-        Arithmetic::Num(n) => *n,
-        Arithmetic::Plus(e1, e2) => evaluate_arithmetic(e1, s) + evaluate_arithmetic(e2, s),
-        Arithmetic::Minus(e1, e2) => evaluate_arithmetic(e1, s) - evaluate_arithmetic(e2, s),
-        Arithmetic::Times(e1, e2) => evaluate_arithmetic(e1, s) * evaluate_arithmetic(e2, s),
+        Exp::Var(x) => s.lookup_var(x.clone()),
+        Exp::Num(n) => *n,
+        Exp::Plus(e1, e2) => evaluate_arithmetic(e1, s) + evaluate_arithmetic(e2, s),
+        Exp::Minus(e1, e2) => evaluate_arithmetic(e1, s) - evaluate_arithmetic(e2, s),
+        Exp::Times(e1, e2) => evaluate_arithmetic(e1, s) * evaluate_arithmetic(e2, s),
+        _ => panic!()
     }
 }
 
-pub fn evaluate_boolean(e: &Boolean, s: &State) -> bool {
+pub fn evaluate_boolean(e: &Exp, s: &State) -> bool {
     match e {
-        Boolean::True => true,
-        Boolean::False => false,
-        Boolean::Less(e1, e2) => evaluate_arithmetic(e1, s) <= evaluate_arithmetic(e2, s),
-        Boolean::Eq(e1, e2) => evaluate_arithmetic(e1, s) == evaluate_arithmetic(e2, s),
-        Boolean::Not(e) => !evaluate_boolean(e, s),
-        Boolean::And(e1, e2) => evaluate_boolean(e1, s) && evaluate_boolean(e2, s),
-        Boolean::Or(e1, e2) => evaluate_boolean(e1, s) || evaluate_boolean(e2, s),
+        Exp::True => true,
+        Exp::False => false,
+        Exp::Less(e1, e2) => evaluate_arithmetic(e1, s) <= evaluate_arithmetic(e2, s),
+        Exp::Eq(e1, e2) => evaluate_arithmetic(e1, s) == evaluate_arithmetic(e2, s),
+        Exp::Not(e) => !evaluate_boolean(e, s),
+        Exp::And(e1, e2) => evaluate_boolean(e1, s) && evaluate_boolean(e2, s),
+        Exp::Or(e1, e2) => evaluate_boolean(e1, s) || evaluate_boolean(e2, s),
+        _ => panic!()
     }
 }

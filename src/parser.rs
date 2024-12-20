@@ -62,17 +62,11 @@ impl Parser {
         match c {
             Token::If => {
                 self.eat(Token::If)?; let s1 = self.parse_bexp()?; self.eat(Token::Then)?; let s2 = self.parse_stmt()?; self.eat(Token::Else)?; let s3 = self.parse_stmt()?;
-                match s1 {
-                    Exp::B(b1) => Ok(Stmt::Cond(Box::new(b1), Box::new(s2), Box::new(s3))),
-                    Exp::A(_) => Err(ParseError::Stmt),
-                }
+                Ok(Stmt::Cond(Box::new(s1), Box::new(s2), Box::new(s3)))
             },
             Token::While => {
                 self.eat(Token::While)?; let s1 = self.parse_bexp()?; self.eat(Token::Do)?; let s2 = self.parse_stmt()?;
-                match s1 {
-                    Exp::B(b1) => Ok(Stmt::While(Box::new(b1), Box::new(s2))),
-                    Exp::A(_) => Err(ParseError::Stmt),
-                }
+                Ok(Stmt::While(Box::new(s1), Box::new(s2)))
             },
             Token::Skip => {
                 self.eat(Token::Skip)?;
@@ -80,10 +74,7 @@ impl Parser {
             },
             Token::Id(s) => {
                 self.eat(Token::Id(s.clone()))?; self.eat(Token::Assignment)?; let s1 = self.parse_aexp()?;
-                match s1 {
-                    Exp::A(a1) => Ok(Stmt::Assn(s, Box::new(a1))),
-                    Exp::B(_) => Err(ParseError::Stmt),
-                }
+                Ok(Stmt::Assn(s, Box::new(s1)))
             },
             Token::LeftCurly => {
                 self.eat(Token::LeftCurly)?; let s1 = self.parse_stmt()?; let s2 = self.parse_stmts(s1); self.eat(Token::RightCurly)?;
@@ -149,15 +140,7 @@ impl Parser {
             Token::Do => {/**/Ok(sub)},
             Token::Or => {
                 self.eat(Token::Or)?; let s1 = self.parse_bfac()?; let s2 = self.parse_bexps(s1)?;
-                match sub {
-                    Exp::B(bsub) => {
-                        match s2 {
-                            Exp::B(b2) => Ok(Exp::B(Boolean::Or(Box::new(bsub), Box::new(b2)))),
-                            Exp::A(_) => Err(ParseError::BExps),
-                        }
-                    }
-                    Exp::A(_) => Err(ParseError::BExps),
-                }
+                Ok(Exp::Or(Box::new(sub), Box::new(s2)))
             },
             Token::RightParenthesis => {/**/Ok(sub)},
             _ => Err(ParseError::BExps),
@@ -206,13 +189,7 @@ impl Parser {
             Token::Or => {/**/Ok(sub)},
             Token::And => {
                 self.eat(Token::And)?; let s1 = self.parse_bneg()?; let s2 = self.parse_bfacs(s1)?;
-                match sub {
-                    Exp::B(bsub) => match s2 {
-                        Exp::B(b2) => Ok(Exp::B(Boolean::And(Box::new(bsub), Box::new(b2)))),
-                        Exp::A(_) => Err(ParseError::BFacs),
-                    }
-                    Exp::A(_) => Err(ParseError::BFacs),
-                }
+                Ok(Exp::And(Box::new(sub), Box::new(s2)))
             },
             Token::RightParenthesis => {/**/Ok(sub)},
             _ => Err(ParseError::BFacs),
@@ -228,10 +205,7 @@ impl Parser {
             },
             Token::Not => {
                 self.eat(Token::Not)?; let s1 = self.parse_bneg()?;
-                match s1 {
-                    Exp::B(b1) => Ok(Exp::B(Boolean::Not(Box::new(b1)))),
-                    Exp::A(_) => Err(ParseError::BNeg),
-                }
+                Ok(Exp::Not(Box::new(s1)))
             },
             Token::Num(_) => {
                 self.parse_brel()
@@ -289,27 +263,11 @@ impl Parser {
             Token::And => {/**/Ok(sub)},
             Token::LessThan => {
                 self.eat(Token::LessThan)?; let s1 = self.parse_aexp()?;
-                match sub {
-                    Exp::A(a1) => {
-                        match s1 {
-                            Exp::A(a2) => Ok(Exp::B(Boolean::Less(Box::new(a1), Box::new(a2)))),
-                            Exp::B(_) => Err(ParseError::BRels)
-                        }
-                    }
-                    Exp::B(_) => Err(ParseError::BRels)
-                }
+                Ok(Exp::Less(Box::new(sub), Box::new(s1)))
             },
             Token::Equals => {
                 self.eat(Token::Equals)?; let s1 = self.parse_aexp()?;
-                match sub {
-                    Exp::A(a1) => {
-                        match s1 {
-                            Exp::A(a2) => Ok(Exp::B(Boolean::Eq(Box::new(a1), Box::new(a2)))),
-                            Exp::B(_) => Err(ParseError::BRels)
-                        }
-                    }
-                    Exp::B(_) => Err(ParseError::BRels),
-                }
+                Ok(Exp::Eq(Box::new(sub), Box::new(s1)))
             },
             Token::RightParenthesis => {/**/Ok(sub)},
             _ => Err(ParseError::BRels),
@@ -361,30 +319,12 @@ impl Parser {
             Token::LessThan => {/**/Ok(sub)},
             Token::Equals => {/**/Ok(sub)},
             Token::Plus => {
-                self.eat(Token::Plus)?; let s1 = self.parse_afac()?; //let s2 = self.parse_aexps(Exp::A(Arithmetic::Plus(Box::new(sub), Box::new(s1))))?;
-                match sub {
-                    Exp::A(asub) => {
-                        match s1 {
-                            Exp::A(a1) => self.parse_aexps(Exp::A(Arithmetic::Plus(Box::new(asub), Box::new(a1)))),
-                            Exp::B(_) => Err(ParseError::AExps),
-                            }
-                        },
-                    Exp::B(_) => Err(ParseError::AExps),
-                    }
-                // }
+                self.eat(Token::Plus)?; let s1 = self.parse_afac()?; let s2 = self.parse_aexps(Exp::Plus(Box::new(sub), Box::new(s1)))?;
+                Ok(s2)
             },
-
             Token::Minus => {
-                self.eat(Token::Minus)?; let s1 = self.parse_afac()?; //let s2 = self.parse_aexps(Exp::A(Arithmetic::Plus(Box::new(sub), Box::new(s1))))?;
-                match sub {
-                    Exp::A(asub) => {
-                        match s1 {
-                            Exp::A(a1) => self.parse_aexps(Exp::A(Arithmetic::Minus(Box::new(asub), Box::new(a1)))),
-                            Exp::B(_) => Err(ParseError::AExps),
-                            }
-                        },
-                    Exp::B(_) => Err(ParseError::AExps),
-                }
+                self.eat(Token::Minus)?; let s1 = self.parse_afac()?; let s2 = self.parse_aexps(Exp::Minus(Box::new(sub), Box::new(s1)))?;
+                Ok(s2)
             },
             Token::RightParenthesis => {/**/Ok(sub)},
             _ => Err(ParseError::AExps),
@@ -437,15 +377,7 @@ impl Parser {
             Token::Minus => {/**/Ok(sub)},
             Token::Asterisk => {
                 self.eat(Token::Asterisk)?; let s1 = self.parse_atom()?; let s2 = self.parse_afacs(s1)?;
-                match sub {
-                    Exp::A(a1) => {
-                        match s2 {
-                            Exp::A(a2) => Ok(Exp::A(Arithmetic::Times(Box::new(a1), Box::new(a2)))),
-                            Exp::B(_) => Err(ParseError::AFacs),
-                        }
-                    },
-                    Exp::B(_) => Err(ParseError::AFacs),
-                }
+                Ok(Exp::Times(Box::new(sub), Box::new(s2)))
             },
             Token::RightParenthesis => {/**/Ok(sub)},
             _ => Err(ParseError::AFacs),
@@ -457,19 +389,19 @@ impl Parser {
         match c {
             Token::Id(s) => {
                 self.eat(Token::Id(s.clone()))?;
-                Ok(Exp::A(Arithmetic::Var(s.to_string())))
+                Ok(Exp::Var(s.to_string()))
             },
             Token::Num(s) => {
                 self.eat(Token::Num(s.clone()))?;
-                Ok(Exp::A(Arithmetic::Num(s.parse().unwrap())))
+                Ok(Exp::Num(s.parse().unwrap()))
             },
             Token::True => {
                 self.eat(Token::True)?;
-                Ok(Exp::B(Boolean::True))
+                Ok(Exp::True)
             },
             Token::False => {
                 self.eat(Token::False)?;
-                Ok(Exp::B(Boolean::False))
+                Ok(Exp::False)
             },
             Token::LeftParenthesis => {
                 self.eat(Token::LeftParenthesis)?; let st = self.parse_bexp()?; self.eat(Token::RightParenthesis)?;
@@ -493,12 +425,12 @@ mod tests {
 
     #[test]
     fn test00() {
-        assert_eq!(parse(&VecDeque::from([Id(String::from("myVar")), Assignment, Id(String::from("x")), Asterisk, LeftParenthesis, Id(String::from("foo")), Plus, Id(String::from("bar")), RightParenthesis, Dollar])), Ok(Stmt::Assn(String::from("myVar"), Box::new(Arithmetic::Times(Box::new(Arithmetic::Var(String::from("x"))), Box::new(Arithmetic::Plus(Box::new(Arithmetic::Var(String::from("foo"))), Box::new(Arithmetic::Var(String::from("bar"))))))))))
+        assert_eq!(parse(&VecDeque::from([Id(String::from("myVar")), Assignment, Id(String::from("x")), Asterisk, LeftParenthesis, Id(String::from("foo")), Plus, Id(String::from("bar")), RightParenthesis, Dollar])), Ok(Stmt::Assn(String::from("myVar"), Box::new(Exp::Times(Box::new(Exp::Var(String::from("x"))), Box::new(Exp::Plus(Box::new(Exp::Var(String::from("foo"))), Box::new(Exp::Var(String::from("bar"))))))))))
     }
 
     #[test]
     fn test11() {
-        assert_eq!(parse(&VecDeque::from([While, True, Do, Skip, Dollar])), Ok(Stmt::While(Box::new(Boolean::True), Box::new(Stmt::Skip))))
+        assert_eq!(parse(&VecDeque::from([While, True, Do, Skip, Dollar])), Ok(Stmt::While(Box::new(Exp::True), Box::new(Stmt::Skip))))
     }
 
     #[test]
@@ -508,7 +440,7 @@ mod tests {
 
     #[test]
     fn test33() {
-        assert_eq!(parse(&VecDeque::from([While, Id(String::from("y")), Plus, Num(String::from("3")), LessThan, Num(String::from("2")), Do, Id(String::from("y")), Assignment, Id(String::from("y")), Plus, Num(String::from("1")), Semicolon, Id(String::from("x")), Assignment, Num(String::from("0")), Dollar])), Ok(Stmt::Seq(Box::new(Stmt::While(Box::new(Boolean::Less(Box::new(Arithmetic::Plus(Box::new(Arithmetic::Var(String::from("y"))), Box::new(Arithmetic::Num(3)))), Box::new(Arithmetic::Num(2)))), Box::new(Stmt::Assn(String::from("y"), Box::new(Arithmetic::Plus(Box::new(Arithmetic::Var(String::from("y"))), Box::new(Arithmetic::Num(1)))))))), Box::new(Stmt::Assn(String::from("x"), Box::new(Arithmetic::Num(0)))))))
+        assert_eq!(parse(&VecDeque::from([While, Id(String::from("y")), Plus, Num(String::from("3")), LessThan, Num(String::from("2")), Do, Id(String::from("y")), Assignment, Id(String::from("y")), Plus, Num(String::from("1")), Semicolon, Id(String::from("x")), Assignment, Num(String::from("0")), Dollar])), Ok(Stmt::Seq(Box::new(Stmt::While(Box::new(Exp::Less(Box::new(Exp::Plus(Box::new(Exp::Var(String::from("y"))), Box::new(Exp::Num(3)))), Box::new(Exp::Num(2)))), Box::new(Stmt::Assn(String::from("y"), Box::new(Exp::Plus(Box::new(Exp::Var(String::from("y"))), Box::new(Exp::Num(1)))))))), Box::new(Stmt::Assn(String::from("x"), Box::new(Exp::Num(0)))))))
     }
 
     #[test]
@@ -518,26 +450,26 @@ mod tests {
 
     #[test]
     fn test55() {
-        assert_eq!(parse(&VecDeque::from([Id(String::from("whiley")), Assignment, LeftParenthesis, Id(String::from("iff")), Plus, Id(String::from("sskip")), RightParenthesis, Asterisk, Id(String::from("doo")), Minus, Id(String::from("thenn")), Dollar])), Ok(Stmt::Assn(String::from("whiley"), Box::new(Arithmetic::Minus(Box::new(Arithmetic::Times(Box::new(Arithmetic::Plus(Box::new(Arithmetic::Var(String::from("iff"))), Box::new(Arithmetic::Var(String::from("sskip"))))),Box::new(Arithmetic::Var(String::from("doo"))))), Box::new(Arithmetic::Var(String::from("thenn"))))))))
+        assert_eq!(parse(&VecDeque::from([Id(String::from("whiley")), Assignment, LeftParenthesis, Id(String::from("iff")), Plus, Id(String::from("sskip")), RightParenthesis, Asterisk, Id(String::from("doo")), Minus, Id(String::from("thenn")), Dollar])), Ok(Stmt::Assn(String::from("whiley"), Box::new(Exp::Minus(Box::new(Exp::Times(Box::new(Exp::Plus(Box::new(Exp::Var(String::from("iff"))), Box::new(Exp::Var(String::from("sskip"))))),Box::new(Exp::Var(String::from("doo"))))), Box::new(Exp::Var(String::from("thenn"))))))))
     }
 
-    // #[test]
-    // fn test66() {
-    //     assert_eq!(parse(&VecDeque::from([While, Id(String::from("a")), And, Id(String::from("b")), And, Id(String::from("c")), Do, Skip, Dollar])), Ok(Stmt::While(Box::new(Exp::And(Box::new(Exp::Var(String::from("a"))), Box::new(Exp::And(Box::new(Exp::Var(String::from("b"))), Box::new(Exp::Var(String::from("c"))))))), Box::new(Stmt::Skip))))
-    // }
-    //
-    // #[test]
-    // fn test77() {
-    //     assert_eq!(parse(&VecDeque::from([While, Id(String::from("a")), Or, Id(String::from("b")), Or, Id(String::from("c")), Do, Skip, Dollar])), Ok(Stmt::While(Box::new(Exp::Or(Box::new(Exp::Var(String::from("a"))), Box::new(Exp::Or(Box::new(Exp::Var(String::from("b"))), Box::new(Exp::Var(String::from("c"))))))), Box::new(Stmt::Skip))))
-    // }
+    #[test]
+    fn test66() {
+        assert_eq!(parse(&VecDeque::from([While, Id(String::from("a")), And, Id(String::from("b")), And, Id(String::from("c")), Do, Skip, Dollar])), Ok(Stmt::While(Box::new(Exp::And(Box::new(Exp::Var(String::from("a"))), Box::new(Exp::And(Box::new(Exp::Var(String::from("b"))), Box::new(Exp::Var(String::from("c"))))))), Box::new(Stmt::Skip))))
+    }
+
+    #[test]
+    fn test77() {
+        assert_eq!(parse(&VecDeque::from([While, Id(String::from("a")), Or, Id(String::from("b")), Or, Id(String::from("c")), Do, Skip, Dollar])), Ok(Stmt::While(Box::new(Exp::Or(Box::new(Exp::Var(String::from("a"))), Box::new(Exp::Or(Box::new(Exp::Var(String::from("b"))), Box::new(Exp::Var(String::from("c"))))))), Box::new(Stmt::Skip))))
+    }
 
     #[test]
     fn test88() {
-        assert_eq!(parse(&VecDeque::from([Id(String::from("x")), Assignment, Id(String::from("a")), Plus, Id(String::from("b")), Plus, Id(String::from("c")), Dollar])), Ok(Stmt::Assn(String::from("x"), Box::new(Arithmetic::Plus(Box::new(Arithmetic::Plus(Box::new(Arithmetic::Var(String::from("a"))), Box::new(Arithmetic::Var(String::from("b"))))),Box::new(Arithmetic::Var(String::from("c"))))))))
+        assert_eq!(parse(&VecDeque::from([Id(String::from("x")), Assignment, Id(String::from("a")), Plus, Id(String::from("b")), Plus, Id(String::from("c")), Dollar])), Ok(Stmt::Assn(String::from("x"), Box::new(Exp::Plus(Box::new(Exp::Plus(Box::new(Exp::Var(String::from("a"))), Box::new(Exp::Var(String::from("b"))))),Box::new(Exp::Var(String::from("c"))))))))
     }
 
     #[test]
     fn test99() {
-        assert_eq!(parse(&VecDeque::from([Id(String::from("x")), Assignment, Id(String::from("a")), Minus, Id(String::from("b")), Minus, Id(String::from("c")), Dollar])), Ok(Stmt::Assn(String::from("x"), Box::new(Arithmetic::Minus(Box::new(Arithmetic::Minus(Box::new(Arithmetic::Var(String::from("a"))), Box::new(Arithmetic::Var(String::from("b"))))),Box::new(Arithmetic::Var(String::from("c"))))))))
+        assert_eq!(parse(&VecDeque::from([Id(String::from("x")), Assignment, Id(String::from("a")), Minus, Id(String::from("b")), Minus, Id(String::from("c")), Dollar])), Ok(Stmt::Assn(String::from("x"), Box::new(Exp::Minus(Box::new(Exp::Minus(Box::new(Exp::Var(String::from("a"))), Box::new(Exp::Var(String::from("b"))))),Box::new(Exp::Var(String::from("c"))))))))
     }
 }
