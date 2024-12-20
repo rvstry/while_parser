@@ -13,18 +13,10 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::VecDeque;
-
     use super::*;
-    use token::Token::*;
-    use ast::Stmt;
-    use ast::Exp;
-    use error::ParseError;
 
     #[test]
-    fn test_all() {
-        assert_eq!("This does not actually test anything", "");
-
+    fn not_a_real_test() {
         let test_strings = ["myVar <- x * (foo + bar)",
                             "while true do skip",
                             "if x <= 3 then x <- x - 1 else y <- y + 1",
