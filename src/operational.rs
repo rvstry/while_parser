@@ -11,7 +11,7 @@ pub fn execute_statement(statement: &Stmt, state: &mut State) -> Result<(), Oper
                 Err(_) => Err(OperationError::Execution),
                 Ok(_)=> {
                     match execute_statement(s2, state) {
-                        Err(_) => return Err(OperationError::Execution),
+                        Err(_) => Err(OperationError::Execution),
                         Ok(_)=> Ok(()),
                     }
                 },
@@ -20,14 +20,14 @@ pub fn execute_statement(statement: &Stmt, state: &mut State) -> Result<(), Oper
         Stmt::Cond(e, s1, s2) => {
             match evaluate_boolean(e, state) {
                 Ok(true) => match execute_statement(s1, state) {
-                    Err(_) => return Err(OperationError::Execution),
+                    Err(_) => Err(OperationError::Execution),
                     Ok(_) => Ok(()),
                 },
                 Ok(false) => match execute_statement(s2, state) {
-                    Err(_) => return Err(OperationError::Execution),
+                    Err(_) => Err(OperationError::Execution),
                     Ok(_) => Ok(()),
                 },
-                Err(_) => return Err(OperationError::Execution),
+                Err(_) => Err(OperationError::Execution),
             }
         },
         Stmt::While(e, s) => {
