@@ -3,12 +3,6 @@ use crate::ast::Exp;
 use crate::error::DenotationError;
 use std::fmt;
 
-#[derive(Eq,Hash, PartialEq)]
-enum Variable {
-    X,
-    Y,
-}
-
 #[derive(Debug)]
 pub struct State {
     state: HashMap<String, i32>
