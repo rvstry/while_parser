@@ -15,7 +15,7 @@ impl Parser {
 
 
     fn peek(&self) -> Result<Token, ParseError> /*Option<Token>*/ {
-        self.input.front().cloned().ok_or(ParseError::TokenError)
+        self.input.front().cloned().ok_or(ParseError::Token)
 
     }
 
@@ -26,7 +26,7 @@ impl Parser {
             self.input = p.split_off(1);
             Ok(())
         }
-        else {Err(ParseError::TokenError)}
+        else {Err(ParseError::Token)}
 
     }
 
@@ -53,7 +53,7 @@ impl Parser {
                 let st1 = self.parse_stmt()?; let st2 = self.parse_stmts(st1); self.eat(Token::Dollar)?;
                 st2
              },
-            _ => Err(ParseError::ParseProgError),
+            _ => Err(ParseError::Prog),
         }
     }
 
@@ -80,7 +80,7 @@ impl Parser {
                 self.eat(Token::LeftCurly)?; let s1 = self.parse_stmt()?; let s2 = self.parse_stmts(s1); self.eat(Token::RightCurly)?;
                 s2
             },
-            _ => Err(ParseError::ParseStmtError),
+            _ => Err(ParseError::Stmt),
 
         }
     }
@@ -95,7 +95,7 @@ impl Parser {
                 self.eat(Token::Semicolon)?; let s1 = self.parse_stmt()?; let s2 = self.parse_stmts(s1)?;
                 Ok(Stmt::Seq(Box::new(sub), Box::new(s2)))
             },
-            _ => Err(ParseError::ParseStmtsError),
+            _ => Err(ParseError::Stmts),
 
         }
     }
@@ -128,7 +128,7 @@ impl Parser {
                 let st1 = self.parse_bfac()?; let st2 = self.parse_bexps(st1);
                 st2
             },
-            _ => Err(ParseError::ParseBExpError),
+            _ => Err(ParseError::BExp),
 
         }
     }
@@ -143,7 +143,7 @@ impl Parser {
                 Ok(Exp::Or(Box::new(sub), Box::new(s2)))
             },
             Token::RightParenthesis => {/**/Ok(sub)},
-            _ => Err(ParseError::ParseBExpsError),
+            _ => Err(ParseError::BExps),
 
         }
     }
@@ -176,7 +176,7 @@ impl Parser {
                 let st1 = self.parse_bneg()?; let st2 = self.parse_bfacs(st1);
                 st2
              },
-            _ => Err(ParseError::ParseBFacError),
+            _ => Err(ParseError::BFac),
 
         }
     }
@@ -192,7 +192,7 @@ impl Parser {
                 Ok(Exp::And(Box::new(sub), Box::new(s2)))
             },
             Token::RightParenthesis => {/**/Ok(sub)},
-            _ => Err(ParseError::ParseBFacsError),
+            _ => Err(ParseError::BFacs),
 
         }
     }
@@ -219,7 +219,7 @@ impl Parser {
             Token::LeftParenthesis => {
                 self.parse_brel()
             },
-            _ => Err(ParseError::ParseBNegError),
+            _ => Err(ParseError::BNeg),
 
         }
     }
@@ -248,7 +248,7 @@ impl Parser {
                 let st1 = self.parse_aexp()?; let st2 = self.parse_brels(st1);
                 st2
             },
-            _ => Err(ParseError::ParseBRelError),
+            _ => Err(ParseError::BRel),
 
         }
     }
@@ -270,7 +270,7 @@ impl Parser {
                 Ok(Exp::Eq(Box::new(sub), Box::new(s1)))
             },
             Token::RightParenthesis => {/**/Ok(sub)},
-            _ => Err(ParseError::ParseBRelsError),
+            _ => Err(ParseError::BRels),
 
         }
     }
@@ -299,7 +299,7 @@ impl Parser {
                 let st1 = self.parse_afac()?; let st2 = self.parse_aexps(st1);
                 st2
             },
-            _ => Err(ParseError::ParseAExpError),
+            _ => Err(ParseError::AExp),
 
         }
     }
@@ -327,7 +327,7 @@ impl Parser {
                 Ok(s2)
             },
             Token::RightParenthesis => {/**/Ok(sub)},
-            _ => Err(ParseError::ParseAExpsError),
+            _ => Err(ParseError::AExps),
 
         }
     }
@@ -355,7 +355,7 @@ impl Parser {
                 let st1 = self.parse_atom()?; let st2 = self.parse_afacs(st1);
                 st2
              },
-            _ => Err(ParseError::ParseAFacError),
+            _ => Err(ParseError::AFac),
 
         }
     }
@@ -380,7 +380,7 @@ impl Parser {
                 Ok(Exp::Times(Box::new(sub), Box::new(s2)))
             },
             Token::RightParenthesis => {/**/Ok(sub)},
-            _ => Err(ParseError::ParseAFacsError),
+            _ => Err(ParseError::AFacs),
 
         }
     }
@@ -407,7 +407,7 @@ impl Parser {
                 self.eat(Token::LeftParenthesis)?; let st = self.parse_bexp()?; self.eat(Token::RightParenthesis)?;
                 Ok(st)
             },
-            _ => Err(ParseError::ParseAtomError),
+            _ => Err(ParseError::Atom),
 
         }
 }
@@ -435,7 +435,7 @@ mod tests {
 
     #[test]
     fn test22() {
-        assert_eq!(parse(&VecDeque::from([If, Id(String::from("x")), LessThan, Equals, Num(String::from("3")), Then, Id(String::from("x")), Assignment, Id(String::from("x")), Minus, Num(String::from("1")), Else, Id(String::from("y")), Assignment, Id(String::from("y")), Plus, Num(String::from("1")), Dollar])), Err(ParseError::ParseAExpError))
+        assert_eq!(parse(&VecDeque::from([If, Id(String::from("x")), LessThan, Equals, Num(String::from("3")), Then, Id(String::from("x")), Assignment, Id(String::from("x")), Minus, Num(String::from("1")), Else, Id(String::from("y")), Assignment, Id(String::from("y")), Plus, Num(String::from("1")), Dollar])), Err(ParseError::AExp))
     }
 
     #[test]
@@ -445,7 +445,7 @@ mod tests {
 
     #[test]
     fn test44() {
-        assert_eq!(parse(&VecDeque::from([Id(String::from("y")), Assignment, Id(String::from("y")), Plus, Num(String::from("1")), Semicolon, Id(String::from("x")), Assignment, Num(String::from("0")), Semicolon, Dollar])), Err(ParseError::ParseStmtError))
+        assert_eq!(parse(&VecDeque::from([Id(String::from("y")), Assignment, Id(String::from("y")), Plus, Num(String::from("1")), Semicolon, Id(String::from("x")), Assignment, Num(String::from("0")), Semicolon, Dollar])), Err(ParseError::Stmt))
     }
 
     #[test]
