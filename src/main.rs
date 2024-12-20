@@ -7,15 +7,32 @@ mod token;
 mod denotational;
 mod operational;
 
-fn main() {
-    let tokens = lexer::lex("y <- x; while !(y = 1) do {y <- y - 1; x <- y * x}").unwrap();
-    let ast = parser::parse(&tokens).unwrap();
+#[derive(Debug, Eq, PartialEq)]
+enum MainError {
+    Lex(error::LexError),
+    Parse(error::ParseError),
+    Execute(error::OperationError)
+}
+
+fn main() -> Result<(), MainError> {
+    let tokens = match lexer::lex("y <- x; while !(y = 1) do {y <- y - 1; x <- y * x}") {
+        Ok(t) => t,
+        Err(e) => return Err(MainError::Lex(e)),
+    };
+    let ast = match parser::parse(&tokens) {
+        Ok(a) => a,
+        Err(e) => return Err(MainError::Parse(e)),
+    };
     let mut state = denotational::State::new();
     state.update_var("x".to_string(), 5);
 
     println!("Initial state: {}", state);
-    operational::execute_statement(&ast, &mut state).unwrap();
+    match operational::execute_statement(&ast, &mut state) {
+        Ok(_) => (),
+        Err(e) => return Err(MainError::Execute(e))
+    };
     println!("Final state: {}", state);
+    Ok(())
 }
 
 #[cfg(test)]
