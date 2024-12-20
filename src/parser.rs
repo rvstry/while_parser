@@ -105,28 +105,28 @@ impl Parser {
         let c = self.peek()?;
         match c {
             Token::Id(_) => {
-                let st1 = self.parse_bfac()?; let st2 = self.parse_bexps(st1);
-                st2
+                let st1 = self.parse_bfac()?;
+                self.parse_bexps(st1)
             },
             Token::Not => {
-                let st1 = self.parse_bfac()?; let st2 = self.parse_bexps(st1);
-                st2
+                let st1 = self.parse_bfac()?;
+                self.parse_bexps(st1)
             },
             Token::Num(_) => {
-                let st1 = self.parse_bfac()?; let st2 = self.parse_bexps(st1);
-                st2
+                let st1 = self.parse_bfac()?;
+                self.parse_bexps(st1)
             },
             Token::True => {
-                let st1 = self.parse_bfac()?; let st2 = self.parse_bexps(st1);
-                st2
+                let st1 = self.parse_bfac()?;
+                self.parse_bexps(st1)
             },
             Token::False => {
-                let st1 = self.parse_bfac()?; let st2 = self.parse_bexps(st1);
-                st2
+                let st1 = self.parse_bfac()?;
+                self.parse_bexps(st1)
             },
             Token::LeftParenthesis => {
-                let st1 = self.parse_bfac()?; let st2 = self.parse_bexps(st1);
-                st2
+                let st1 = self.parse_bfac()?;
+                self.parse_bexps(st1)
             },
             _ => Err(ParseError::BExp),
 
@@ -153,28 +153,28 @@ impl Parser {
         let c = self.peek()?;
         match c {
             Token::Id(_) => {
-                let st1 = self.parse_bneg()?; let st2 = self.parse_bfacs(st1);
-                st2
+                let st1 = self.parse_bneg()?;
+                self.parse_bfacs(st1)
             },
             Token::Not => {
-                let st1 = self.parse_bneg()?; let st2 = self.parse_bfacs(st1);
-                st2
+                let st1 = self.parse_bneg()?;
+                self.parse_bfacs(st1)
              },
             Token::Num(_) => {
-                let st1 = self.parse_bneg()?; let st2 = self.parse_bfacs(st1);
-                st2
+                let st1 = self.parse_bneg()?;
+                self.parse_bfacs(st1)
              },
             Token::True => {
-                let st1 = self.parse_bneg()?; let st2 = self.parse_bfacs(st1);
-                st2
+                let st1 = self.parse_bneg()?;
+                self.parse_bfacs(st1)
              },
             Token::False => {
-                let st1 = self.parse_bneg()?; let st2 = self.parse_bfacs(st1);
-                st2
+                let st1 = self.parse_bneg()?;
+                self.parse_bfacs(st1)
              },
             Token::LeftParenthesis => {
-                let st1 = self.parse_bneg()?; let st2 = self.parse_bfacs(st1);
-                st2
+                let st1 = self.parse_bneg()?;
+                self.parse_bfacs(st1)
              },
             _ => Err(ParseError::BFac),
 
@@ -229,24 +229,24 @@ impl Parser {
         let c = self.peek()?;
         match c {
             Token::Id(_) => {
-                let st1 = self.parse_aexp()?; let st2 = self.parse_brels(st1);
-                st2
+                let st1 = self.parse_aexp()?;
+                self.parse_brels(st1)
             },
             Token::Num(_) => {
-                let st1 = self.parse_aexp()?; let st2 = self.parse_brels(st1);
-                st2
+                let st1 = self.parse_aexp()?;
+                self.parse_brels(st1)
             },
             Token::True => {
-                let st1 = self.parse_aexp()?; let st2 = self.parse_brels(st1);
-                st2
+                let st1 = self.parse_aexp()?;
+                self.parse_brels(st1)
             },
             Token::False => {
-                let st1 = self.parse_aexp()?; let st2 = self.parse_brels(st1);
-                st2
+                let st1 = self.parse_aexp()?;
+                self.parse_brels(st1)
             },
             Token::LeftParenthesis => {
-                let st1 = self.parse_aexp()?; let st2 = self.parse_brels(st1);
-                st2
+                let st1 = self.parse_aexp()?;
+                self.parse_brels(st1)
             },
             _ => Err(ParseError::BRel),
 
@@ -280,24 +280,24 @@ impl Parser {
         let c = self.peek()?;
         match c {
             Token::Id(_) => {
-                let st1 = self.parse_afac()?; let st2 = self.parse_aexps(st1);
-                st2
+                let st1 = self.parse_afac()?;
+                self.parse_aexps(st1)
             },
             Token::Num(_) => {
-                let st1 = self.parse_afac()?; let st2 = self.parse_aexps(st1);
-                st2
+                let st1 = self.parse_afac()?;
+                self.parse_aexps(st1)
             },
             Token::True => {
-                let st1 = self.parse_afac()?; let st2 = self.parse_aexps(st1);
-                st2
+                let st1 = self.parse_afac()?;
+                self.parse_aexps(st1)
             },
             Token::False => {
-                let st1 = self.parse_afac()?; let st2 = self.parse_aexps(st1);
-                st2
+                let st1 = self.parse_afac()?;
+                self.parse_aexps(st1)
             },
             Token::LeftParenthesis => {
-                let st1 = self.parse_afac()?; let st2 = self.parse_aexps(st1);
-                st2
+                let st1 = self.parse_afac()?;
+                self.parse_aexps(st1)
             },
             _ => Err(ParseError::AExp),
 
@@ -336,24 +336,24 @@ impl Parser {
         let c = self.peek()?;
         match c {
             Token::Id(_) => {
-                let st1 = self.parse_atom()?; let st2 = self.parse_afacs(st1);
-                st2
+                let st1 = self.parse_atom()?;
+                self.parse_afacs(st1)
             },
             Token::Num(_) => {
-                let st1 = self.parse_atom()?; let st2 = self.parse_afacs(st1);
-                st2
+                let st1 = self.parse_atom()?;
+                self.parse_afacs(st1)
              },
             Token::True => {
-                let st1 = self.parse_atom()?; let st2 = self.parse_afacs(st1);
-                st2
+                let st1 = self.parse_atom()?;
+                self.parse_afacs(st1)
              },
             Token::False => {
-                let st1 = self.parse_atom()?; let st2 = self.parse_afacs(st1);
-                st2
+                let st1 = self.parse_atom()?;
+                self.parse_afacs(st1)
              },
             Token::LeftParenthesis => {
-                let st1 = self.parse_atom()?; let st2 = self.parse_afacs(st1);
-                st2
+                let st1 = self.parse_atom()?;
+                self.parse_afacs(st1)
              },
             _ => Err(ParseError::AFac),
 
