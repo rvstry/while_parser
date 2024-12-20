@@ -8,7 +8,13 @@ mod denotational;
 mod operational;
 
 fn main() {
+    let tokens = lexer::lex("n <- 42").unwrap();
+    let ast = parser::parse(&tokens).unwrap();
+    let mut state = denotational::State::new();
 
+    println!("Initial state: {:?}", state);
+    operational::execute_statement(&ast, &mut state);
+    println!("Final state: {:?}", state);
 }
 
 #[cfg(test)]

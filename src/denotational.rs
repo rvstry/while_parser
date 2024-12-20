@@ -7,6 +7,7 @@ enum Variable {
     Y,
 }
 
+#[derive(Debug)]
 pub struct State {
     state: HashMap<String, i32>
 }
