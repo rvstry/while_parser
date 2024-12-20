@@ -1,7 +1,7 @@
 pub trait Ast {
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum Exp {
     True,
     False,
@@ -19,7 +19,7 @@ pub enum Exp {
 
 impl Ast for Exp {}
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum Stmt {
     Skip,
     Assn(String, Box<Exp>),

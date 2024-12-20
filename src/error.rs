@@ -3,7 +3,7 @@ pub enum LexError {
     WhileError,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum ParseError {
     // ParseError,
     TokenError,
