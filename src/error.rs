@@ -22,3 +22,14 @@ pub enum ParseError {
     AFacs,
     Atom,
 }
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum DenotationError {
+    Arithmetic,
+    Boolean,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum OperationError {
+    Execution,
+}

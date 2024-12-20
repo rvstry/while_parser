@@ -14,7 +14,7 @@ fn main() {
     state.update_var("x".to_string(), 5);
 
     println!("Initial state: {:?}", state);
-    operational::execute_statement(&ast, &mut state);
+    operational::execute_statement(&ast, &mut state).unwrap();
     println!("Final state: {:?}", state);
 }
 
