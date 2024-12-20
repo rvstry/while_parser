@@ -95,13 +95,16 @@ pub fn lex(s: &str) -> Result<VecDeque<Token>, LexError> {
                     i = out;
                     tokens.push_back(t);
                 }
-                if c.is_ascii_lowercase() {
+                else if c.is_ascii_lowercase() {
                     let (t, out) = lex_kw_or_id(i)?;
                     i = out;
                     tokens.push_back(t);
                 }
-                if c.is_ascii_whitespace() {
+                else if c.is_ascii_whitespace() {
                     i = eat(i, c)?;
+                }
+                else {
+                    return Err(LexError::WhileError);
                 }
             }
 
